@@ -1,0 +1,28 @@
+[package]
+name = "collection_id"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "main"
+path = "src/main.rs"
+
+#[[bin]]
+#name = "hypermain"
+#path = "src/hypermain.rs"
+
+[profile.release]
+opt-level = "s"  # Optimize for size.
+lto = true          # Enable Link Time Optimization
+codegen-units = 1   # Reduce number of codegen units to increase optimizations.
+panic = "abort"     # Abort on panic
+strip = true
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+reqwest = { version = "0.11", features = ["rustls-tls" , "gzip"] }
+tokio = { version = "1", features = ["full"] }
+anyhow = "1.0"
+ansi_term = "0.12.1"
+chrono = "0.4"
