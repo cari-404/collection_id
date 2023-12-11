@@ -12,6 +12,7 @@ use serde_json;
 use serde_json::Value;
 use anyhow::Result;
 use reqwest::Version;
+use std::env;
 use std::fs;
 use std::fs::File;
 use std::fs::OpenOptions;
@@ -35,8 +36,6 @@ struct VoucherCollectionRequest {
     offset: i64,
     number_of_vouchers_per_row: i64,
 }
-
-
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -65,7 +64,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let selected_file = loop {
 		println!("Pilih nomor file cookie yang ingin digunakan:");
 		let mut input = String::new();
-		io::stdin().read_line(&mut input).expect("Gagal membaca baris");
+		let input = env::var("COOKIE_IDX")
+			.expect("Environment variable COOKIE_IDX tidak ditemukan");
 
 		// Konversi input ke nomor indeks
 		if let Ok(index) = input.trim().parse::<usize>() {
@@ -100,14 +100,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 			
 	println!("Contoh input: Awal: 12905192072, Akhir: 12905192100");
     println!("Masukkan nilai start:");
-    io::stdin().read_line(&mut start).expect("Gagal membaca baris");
+    let start = env::var("START_COLLECTION_ID")
+		.expect("Environment variable START_COLLECTION_ID tidak ditemukan");
 
     println!("Masukkan nilai akhir:");
-    io::stdin().read_line(&mut end).expect("Gagal membaca baris");
+    let end = env::var("END_COLLECTION_ID")
+		.expect("Environment variable END_COLLECTION_ID tidak ditemukan");
 	
 	println!("Contoh input DC10010RB1109");
 	println!("Masukkan voucher_code:");
-    io::stdin().read_line(&mut v_code).expect("Gagal membaca baris");
+	let v_code = env::var("VOUCHER_CODE")
+		.expect("Environment variable VOUCHER_CODE tidak ditemukan");
 
     // Parse nilai start dan akhir ke dalam tipe data integer
     let start: i64 = start.trim().parse().expect("Input tidak valid");
@@ -260,10 +263,5 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!();
         batch_number += 1;
     }
-    // Tunggu input dari pengguna sebelum keluar
-    println!("Tekan 'Enter' untuk keluar.");
-    let mut input = String::new();
-    io::stdin().read_line(&mut input).expect("Gagal membaca baris");
-	
     Ok(())
 }
