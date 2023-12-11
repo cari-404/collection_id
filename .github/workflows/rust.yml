@@ -19,9 +19,10 @@ jobs:
     - name: Run tests
       run: |
         sudo dpkg --add-architecture i386
-        sudo dpkg --add-architecture arm64
         sudo apt update
-        sudo apt install gcc-mingw-w64 libc6-dev-i386 libssl-dev:i386 gcc-11-aarch64-linux-gnu gcc-aarch64-linux-gnu libssl-dev:arm64 -y
+        sudo apt install gcc-mingw-w64 libc6-dev-i386 libssl-dev:i386 gcc-11-aarch64-linux-gnu gcc-aarch64-linux-gnu -y
+        curl -LJO http://ftp.tw.debian.org/debian/pool/main/o/openssl/libssl-dev_3.0.11-1_arm64.deb
+        sudo apt install libssl-dev_3.0.11-1_arm64.deb
         rustup update
         rustup target add i686-pc-windows-gnu
         rustup target add x86_64-pc-windows-gnu
