@@ -79,6 +79,9 @@ jobs:
       with:
         name: main64.exe
         path: main64.exe
+
+    - name: Run tests
+      run: ls -R
         
     - name: Create GitHub Release
       id: create_release
