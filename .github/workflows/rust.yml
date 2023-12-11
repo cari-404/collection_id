@@ -95,7 +95,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: main32.exe
+        asset_path: ./main32.exe
         asset_name: main32.exe
         asset_content_type: application/x-msdownload
     - name: Upload Release Artifact Pringgodani
@@ -104,7 +104,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: main64.exe
+        asset_path: ./main64.exe
         asset_name: main64.exe
         asset_content_type: application/x-msdownload
     - name: Upload Release Artifact Pringgodani
@@ -113,6 +113,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: main64
+        asset_path: ./main64
         asset_name: main64
         asset_content_type: application/x-elf
