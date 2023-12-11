@@ -24,13 +24,13 @@ jobs:
         rustup update
         rustup target add i686-pc-windows-gnu
         rustup target add x86_64-pc-windows-gnu
-        rustup target add i686-unknown-linux-gnu
+
     - name: Cargo 
       run: |
         cargo build --release --target x86_64-unknown-linux-gnu
         cargo build --release --target i686-pc-windows-gnu
         cargo build --release --target x86_64-pc-windows-gnu
-        cargo build --release --target i686-unknown-linux-gnu
+
     - name: Run tests
       run: ls -R
 
@@ -48,12 +48,6 @@ jobs:
         path: |
           ./target/x86_64-pc-windows-gnu/release/main.exe
 
-    - name: Upload Artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: main32
-        path: |
-          ./target/i686-unknown-linux-gnu/release/main
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v3
@@ -70,11 +64,6 @@ jobs:
       contents: write
 
     steps:
-    - name: Download Artifact
-      uses: actions/download-artifact@v3
-      with:
-        name: main32
-        path: main32
     - name: Download Artifact
       uses: actions/download-artifact@v3
       with:
@@ -118,15 +107,6 @@ jobs:
         asset_path: main64.exe
         asset_name: main64.exe
         asset_content_type: application/x-msdownload
-    - name: Upload Release Artifact Pringgodani
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: main32
-        asset_name: main32
-        asset_content_type: application/x-elf
     - name: Upload Release Artifact Pringgodani
       uses: actions/upload-release-asset@v1
       env:
