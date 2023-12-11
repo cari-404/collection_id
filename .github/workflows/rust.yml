@@ -102,8 +102,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: v1.0.3
-        release_name: version 1.0.3
+        tag_name: v1.0.3-real
+        release_name: version 1.0.3-real
 
     - name: Upload Release Artifact Pringgodani
       uses: actions/upload-release-asset@v1
