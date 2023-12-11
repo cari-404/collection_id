@@ -263,10 +263,5 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!();
         batch_number += 1;
     }
-    // Tunggu input dari pengguna sebelum keluar
-    println!("Tekan 'Enter' untuk keluar.");
-    let mut input = String::new();
-    io::stdin().read_line(&mut input).expect("Gagal membaca baris");
-	
     Ok(())
 }
