@@ -19,6 +19,7 @@ jobs:
     - name: Run tests
       run: |
         rustup update
+        rustup target add i686-pc-windows-gnu
         rustup show
     - name: Cargo 
       run: |
