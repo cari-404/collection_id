@@ -1,8 +1,9 @@
 //This Is a first version of get_vouchers_by_collections
 //This version using api reqwest
-//Whats new In 1.0.3 :
-//add ansi colour
-//add log file same as python
+//Whats new In 1.1.0 :
+//Add argument "start end voucher_code"
+//Add argument "cookie"
+//Remove Tekan 'Enter' untuk keluar.
 
 use reqwest;
 use reqwest::ClientBuilder;
@@ -18,7 +19,7 @@ use std::fs::OpenOptions;
 use std::io::Write;
 use std::io::prelude::*;
 use ansi_term::Colour;
-use chrono::{DateTime, Utc, NaiveDateTime};
+use chrono::Utc;
 
 #[derive(Serialize)]
 struct JsonRequest {
@@ -36,21 +37,25 @@ struct VoucherCollectionRequest {
     number_of_vouchers_per_row: i64,
 }
 
+async fn process_arguments(start: &str, end: &str, v_code: &str) -> Result<()> {
+    // Read the content of "akun.conf"
+    let selected_file = std::fs::read_to_string("./akun.conf")?;
+    let file_path = format!("./akun/{}", selected_file.trim());
+    let mut cookie_content = String::new();
+    std::fs::File::open(&file_path)?.read_to_string(&mut cookie_content)?;
 
+    // Process HTTP with common function
+    some_function(start, end, v_code, &cookie_content, &selected_file).await?;
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-	// Input nilai start dan akhir
+    Ok(())
+}
+
+async fn manual_input() -> Result<()> {
     let mut start = String::new();
     let mut end = String::new();
-	let mut v_code = String::new();
-	let formatted_datetime = Utc::now().format("%Y-%m-%d_%H-%M-%S").to_string();
-	
-	println!("get_vouchers_by_collections [Version 1.0.3]");
-	println!("");
-	println!("Dapatkan Info terbaru di https://google.com");
-	println!("");
-	// Menampilkan daftar file cookie yang tersedia
+    let mut v_code = String::new();
+    
+    // Display the list of available cookie files
     println!("Daftar file cookie yang tersedia:");
     let files = std::fs::read_dir("./akun")?;
     let mut file_options = Vec::new();
@@ -61,25 +66,47 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             file_options.push(file_name.to_string_lossy().to_string());
         }
     }
-	// Pilih nomor file cookie yang ingin digunakan
+
+    // Select the file number for the cookie
     let selected_file = loop {
-		println!("Pilih nomor file cookie yang ingin digunakan:");
-		let mut input = String::new();
-		io::stdin().read_line(&mut input).expect("Gagal membaca baris");
+        println!("Pilih nomor file cookie yang ingin digunakan:");
+        let mut input = String::new();
+        io::stdin().read_line(&mut input).expect("Gagal membaca baris");
 
-		// Konversi input ke nomor indeks
-		if let Ok(index) = input.trim().parse::<usize>() {
-			if index > 0 && index <= file_options.len() {
-				break file_options[index - 1].clone();
-			}
-		}
-	};
+        // Convert input to index number
+        if let Ok(index) = input.trim().parse::<usize>() {
+            if index > 0 && index <= file_options.len() {
+                break file_options[index - 1].clone();
+            }
+        }
+    };
 
-	// Baca isi file cookie
-	let file_path = format!("./akun/{}", selected_file);
-	let mut cookie_content = String::new();
-	File::open(&file_path)?.read_to_string(&mut cookie_content)?;
+    // Read the content of the selected cookie file
+    let file_path = format!("./akun/{}", selected_file);
+    let mut cookie_content = String::new();
+    File::open(&file_path)?.read_to_string(&mut cookie_content)?;
 	
+	println!("Contoh input: Awal: 12905192072, Akhir: 12905192100");
+    println!("Masukkan nilai start:");
+    io::stdin().read_line(&mut start).expect("Gagal membaca baris");
+
+    println!("Masukkan nilai akhir:");
+    io::stdin().read_line(&mut end).expect("Gagal membaca baris");
+	
+	println!("Contoh input DC10010RB1109");
+	println!("Masukkan voucher_code:");
+    io::stdin().read_line(&mut v_code).expect("Gagal membaca baris");
+
+    // Process HTTP with common function
+    match some_function(&start, &end, &v_code, &cookie_content, &selected_file).await {
+    Ok(_) => {},
+    Err(err) => eprintln!("Error: {}", err),
+	}
+    Ok(())
+}
+
+async fn some_function(start: &str, end: &str, v_code: &str, cookie_content: &str, selected_file: &str) -> Result<()> {
+	let formatted_datetime = Utc::now().format("%Y-%m-%d_%H-%M-%S").to_string();
 	// Mengonversi nama akun menjadi format folder yang sesuai
     let header_folder = format!("./header/{}/af-ac-enc-sz-token.txt", selected_file);
 	
@@ -97,21 +124,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut sz_token_content = String::new();
     File::open(&header_folder)?.read_to_string(&mut sz_token_content)?;
 	println!("sz-token:{}", sz_token_content);
-			
-	println!("Contoh input: Awal: 12905192072, Akhir: 12905192100");
-    println!("Masukkan nilai start:");
-    io::stdin().read_line(&mut start).expect("Gagal membaca baris");
-
-    println!("Masukkan nilai akhir:");
-    io::stdin().read_line(&mut end).expect("Gagal membaca baris");
 	
-	println!("Contoh input DC10010RB1109");
-	println!("Masukkan voucher_code:");
-    io::stdin().read_line(&mut v_code).expect("Gagal membaca baris");
-
-    // Parse nilai start dan akhir ke dalam tipe data integer
-    let start: i64 = start.trim().parse().expect("Input tidak valid");
-    let end: i64 = end.trim().parse().expect("Input tidak valid");
+	let start: i64 = start.trim().parse().expect("Input tidak valid");
+	let end: i64 = end.trim().parse().expect("Input tidak valid");
 
     // Jumlah nilai per batch
     let values_per_batch = 5;
@@ -145,11 +160,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 			headers.insert("x-shopee-language", reqwest::header::HeaderValue::from_static("id"));
 			headers.insert("x-requested-with", reqwest::header::HeaderValue::from_static("XMLHttpRequest"));
 			headers.insert("x-sap-access-t", reqwest::header::HeaderValue::from_static("1694342213"));
-			headers.insert("af-ac-enc-dat", reqwest::header::HeaderValue::from_static("AAczLjMuMC0yAAABjD2/+9wAAA+nAyAAAAAAAAAAAv0CU/YKNLZ3x+BnWz70VZfkPeXOl/82EyfDx/bVRcPaaRvYm5f/NhMnw8f21UXD2mkb2JseRmK2cCMhvxPnkQMgYOR3MdO0gnVkjIgJW23lZmQ6sCWooZQKR7gDVwwCOYI1dY53Klz0SQJAiMqSWXTebQiMBSCy14MigrBSynoPM/sJ55f/NhMnw8f21UXD2mkb2Jtn/ITcW+wLKZcVOXYrFuPG8oyOVk+CDzd2jz4zfQgqkxN5QCFuh0m2a7iQsFUA38jt78nvQtHCyYkKdmCs2BOm0RySdhyhKzToeXrsCr/7VgmrRqWZ6CUplt6oFbQx+d+S131dA11Iyo+it+R0CjI1jVVTM0ZXbzLLjOMDkk0u56JlVsxG5BkGVyzOLMyu0PDy2k1+VdkT4pgXk5lHU3OPYXlO2iSYnkJub+qCrFiPR7t/x/v9SPKXNqWKS7oOCZ9xcVTz7HDD3cgFNYM1SCF4KX0sQZdHIFpWrefIgEZDRt7bpc6e6UvvoL4f9+4rwqv23iZus44hunvXxHju3CIGekVQqyQYHKRy3gkwLDX1fSh6bAojldn5JgJweNxrodaDu4ubLr4bcUOLBA2c2bmdlgH+2CNyd5v6F9lcOXQq5szoUhKAg6vJXYPkXE5ho+pc0XG8frvsLhQK78fs7www8WJ6JV771K7M3S4Ty2Ncm8vFui5C+Cokhc47s9IEFIsGDUtpEpNSSI0oOt3tagOTHkenEhnNI10zaevKlBjvvsvFui5C+Cokhc47s9IEFIsGDUtpEpNSSI0oOt3tagOTUWJy02xIVh23BkGRTuyWQfap+xOCy0qf6FceYCNc1JRGrbfJWuRYlFp+J0tcUk6vRQg7nCQX6c8aLMHSU1udIlj4f3pW05can3G4luWGcOFGrbfJWuRYlFp+J0tcUk6vMzJkOKM7a6hSXhvQxqV9Gr75OCXRj3ppyFQjfu1/3QAwDau2Xiuafq3FAfj0VLRrH3wBwU+KzLIFlwnnaaSPkUHfwoKFdwD4S3t6s0u0cnMeoZffwAq9Vd5qYWkImDtWIq9wd+MfTC4cdHCfaUSI7Q=="));
+			headers.insert("af-ac-enc-dat", reqwest::header::HeaderValue::from_static(""));
 			headers.insert("x-sap-access-s", reqwest::header::HeaderValue::from_static("LwGv74_7pqcgSlOERyAuF3XJ4Xw9IZ6gWvo_ZdVuFJA="));
 			headers.insert("x-csrftoken", reqwest::header::HeaderValue::from_static("6du999g4UlXCglP4gjLi1wp6RzWoa4BW"));
 			headers.insert("sec-ch-ua-platform", reqwest::header::HeaderValue::from_static("\"Windows\""));
-			headers.insert("x-sap-sec", reqwest::header::HeaderValue::from_static("kDXjm6XKbFr0xFr0ZJr+xFN0ZJr0xFN0xFr7xFr0uFp0xDjKxFOaxmr0ZFr0x1fAr0b+xFr0eF50x1j2xFPIDZAA+FkzOI22AYpdVDxPaBB5QSI5j9U3mrFs9tDTUeoMYq3vGOSVZet5IaRgpFKPx1Er7/d8Rb9kxcl6yBWBZbMNSTZCd4adh1HH0bhfVHZkidUCgGqjr45Jzx1JVnmPNZcJ+ehT/nAFH7xt16ef1OF6zzDYBZEe3Fy1DlrEB+ReGk8T2J0PUm7NOtCLUmbqvGLcTPgDjBqf1S0ffGWTwTmvx8tkwThmeS9h7DMdv57LbEvhRBhkGbGmYnYmjdfgykMGjvg3dDNzCtHPPyQWiFk324WM0JIt4ORp3VNqh8Z4bgsgluTEjauT+IvbjDdJDhTl2K5vKC0NCCgtrtRTqnfwBge0+ZB0iHfYHpFCOxTLo0aJNa1eLjBvhT4oGPgKEHGfe0RDkCi+KT1DdspJEccEn3KGBi7q8iUzz0HSwH/x0RVrtHaHnZBdC2oxhs++qJSqKu0p6sFUQe6IeUW+WiHlfINlkFslqdFFr7zmxgfXhRzHGR7cIp2yUWdNbhddLp95LPq13zttiDUQb5KzMB3fcxQgv4Xc32c1Sx7gCvMLovrcGsiKxFGmsDfS5TfzEanxiN5zUgJ1XSj+xFr0fdRVFr0xg4N0xFr00qxFrcX0xFr4xFr0GFr0xXtU9cqzp1ZLM0zpHTYuuskNWjpzaFr0xT+CfdNUF40wxFr0xtfFr0b+xFr0wFr0xDN0xFO9BImbC+SDBfZuZziUGD52wjmeOJX0xFkGFj4wFTTbDmr0xFr+xFj0aFr7xFX0xFr+xFr0wFr0xDN0xFOmsOpUxzmjjqTe2jVcMkU3QpdGEmX0xFrtgdRnfdRufJr0xFO="));
+			headers.insert("x-sap-sec", reqwest::header::HeaderValue::from_static(""));
 			headers.insert("sec-ch-ua-mobile", reqwest::header::HeaderValue::from_static("?0"));
 			headers.insert("user-agent", reqwest::header::HeaderValue::from_static("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"));
 			headers.insert("x-api-source", reqwest::header::HeaderValue::from_static("pc"));
@@ -260,10 +275,76 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!();
         batch_number += 1;
     }
-    // Tunggu input dari pengguna sebelum keluar
-    println!("Tekan 'Enter' untuk keluar.");
-    let mut input = String::new();
-    io::stdin().read_line(&mut input).expect("Gagal membaca baris");
+    Ok(())	
+}
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Check if there are command line arguments
+    let args: Vec<String> = std::env::args().collect();
 	
+	println!("-------------------------------------------");
+	println!("get_vouchers_by_collections [Version 1.1.0]");
+	println!("");
+	println!("Dapatkan Info terbaru di https://google.com");
+	println!("");
+	println!("-------------------------------------------");
+
+	// Mengecek jenis metode berdasarkan jumlah argumen
+    match args.len() {
+        2 if args[1] == "cookie" => {
+            // Metode Cookie: Memilih cookie dan menyimpannya di file akun.conf
+            println!("Metode Cookie: Memilih cookie dan menyimpannya di file akun.conf");
+
+            // Memanggil fungsi untuk memilih cookie dan menyimpannya
+            choose_and_save_cookie()?;
+        }
+        4 => {
+            // Metode Cepat: Menjalankan main.exe dengan tiga argumen
+            println!("Metode Cepat: Menjalankan main.exe dengan tiga argumen.");
+            
+			// Case: Command-line arguments provided (e.g., "main.exe 12905192072 12905200000 DC10010RB110")
+			let start = &args[1];
+			let end = &args[2];
+			let v_code = &args[3];
+			process_arguments(start, end, v_code).await?;
+         }
+        _ => {
+            // Case: No command-line arguments (old manual input method)
+            manual_input().await?;
+        }
+    }
+    Ok(())
+}
+
+fn choose_and_save_cookie() -> Result<(), Box<dyn std::error::Error>> {
+    // Menampilkan daftar file cookie yang tersedia
+    println!("Daftar file cookie yang tersedia:");
+    let files = std::fs::read_dir("./akun")?;
+    let mut file_options = Vec::new();
+    for (index, file) in files.enumerate() {
+        if let Ok(file) = file {
+            let file_name = file.file_name();
+            println!("{}. {}", index + 1, file_name.to_string_lossy());
+            file_options.push(file_name.to_string_lossy().to_string());
+        }
+    }
+    // Pilih nomor file cookie yang ingin digunakan
+    let selected_file = loop {
+        println!("Pilih nomor file cookie yang ingin digunakan:");
+        let mut input = String::new();
+        io::stdin().read_line(&mut input).expect("Gagal membaca baris");
+
+        // Konversi input ke nomor indeks
+        if let Ok(index) = input.trim().parse::<usize>() {
+            if index > 0 && index <= file_options.len() {
+                break file_options[index - 1].clone();
+            }
+        }
+    };
+    // Simpan nama file cookie yang dipilih ke dalam akun.conf
+    let mut akun_conf_file = File::create("akun.conf")?;
+    write!(akun_conf_file, "{}", selected_file)?;
+
     Ok(())
 }
