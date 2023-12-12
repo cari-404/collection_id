@@ -25,12 +25,9 @@ jobs:
         rustup update
         rustup target add i686-pc-windows-gnu
         rustup target add x86_64-pc-windows-gnu
-        rustup target add aarch64-unknown-linux-gnu
-        cargo add openssl-sys
 
     - name: Cargo 
       run: |
-        cargo build --release --target aarch64-unknown-linux-gnu
         cargo build --release --target x86_64-unknown-linux-gnu
         cargo build --release --target i686-pc-windows-gnu
         cargo build --release --target x86_64-pc-windows-gnu
@@ -59,13 +56,6 @@ jobs:
         path: |
           ./target/x86_64-unknown-linux-gnu/release/main
 
-    - name: Upload Artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: mainarm64
-        path: |
-          ./target/x86_64-unknown-linux-gnu/release/main
-
   upload_to_release:
     name: Upload to Release
     needs: [build]  # Menunggu kedua pekerjaan selesai
@@ -79,11 +69,6 @@ jobs:
       with:
         name: main64
         path: main64
-    - name: Download Artifact
-      uses: actions/download-artifact@v3
-      with:
-        name: mainarm64
-        path: mainarm64
     - name: Download Artifact
       uses: actions/download-artifact@v3
       with:
@@ -133,13 +118,4 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./main64/main
         asset_name: main64
-        asset_content_type: application/x-elf
-    - name: Upload Release Artifact Pringgodani
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./mainarm64/main
-        asset_name: mainarm64
         asset_content_type: application/x-elf
