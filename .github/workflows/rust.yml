@@ -45,7 +45,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Dependency
-      if: matrix.platform.os_name != 'Linux-aarch64' && matrix.platform.os_name != 'Linux-amd64' && matrix.platform.os_name != 'Linux-i686'
+      if: matrix.platform.os_name == 'Linux-i686'
       run: |
         sudo dpkg --add-architecture i386
         sudo apt update
