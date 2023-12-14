@@ -9,112 +9,68 @@ on:
 env:
   CARGO_TERM_COLOR: always
 
+permissions:
+  contents: write
+
 jobs:
   build:
-
-    runs-on: ubuntu-latest
-
+    name: ${{ matrix.platform.os_name }} with rust ${{ matrix.toolchain }}
+    runs-on: ${{ matrix.platform.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - os_name: Linux-aarch64
+            os: ubuntu-20.04
+            target: aarch64-unknown-linux-musl
+            bin: main-linux-arm64
+          - os_name: Linux-x86_64
+            os: ubuntu-20.04
+            target: x86_64-unknown-linux-gnu
+            bin: main-linux-amd64
+          - os_name: Windows-x86_64
+            os: windows-latest
+            target: x86_64-pc-windows-msvc
+            bin: main-amd64.exe
+          - os_name: Windows-i686
+            os: windows-latest
+            target: i686-pc-windows-msvc
+            bin: main-i686.exe
+        toolchain:
+          - stable
     steps:
     - uses: actions/checkout@v3
     - name: Run tests
       run: |
-        sudo dpkg --add-architecture i386
         sudo apt update
         sudo apt install gcc-mingw-w64 libc6-dev-i386 libssl-dev:i386 gcc-11-aarch64-linux-gnu gcc make gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu -y
-        rustup update
-        rustup target add i686-pc-windows-gnu
-        rustup target add x86_64-pc-windows-gnu
 
-    - name: Cargo 
-      run: |
-        cargo build --release --target x86_64-unknown-linux-gnu
-        cargo build --release --target i686-pc-windows-gnu
-        cargo build --release --target x86_64-pc-windows-gnu
-
-    - name: Run tests
-      run: ls -R
-
-    - name: Upload Artifacts
-      uses: actions/upload-artifact@v3
+    - name: Build binary
+      uses: houseabsolute/actions-rust-cross@v0
       with:
-        name: main32.exe
-        path: |
-          ./target/i686-pc-windows-gnu/release/main.exe
-
-    - name: Upload Artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: main64.exe
-        path: |
-          ./target/x86_64-pc-windows-gnu/release/main.exe
-
-    - name: Upload Artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: main64
-        path: |
-          ./target/x86_64-unknown-linux-gnu/release/main
-
-  upload_to_release:
-    name: Upload to Release
-    needs: [build]  # Menunggu kedua pekerjaan selesai
-    runs-on: ubuntu-22.04
-    permissions:
-      contents: write
-
-    steps:
-    - name: Download Artifact
-      uses: actions/download-artifact@v3
-      with:
-        name: main64
-        path: main64
-    - name: Download Artifact
-      uses: actions/download-artifact@v3
-      with:
-        name: main32.exe
-        path: main32.exe
-    - name: Download Artifact
-      uses: actions/download-artifact@v3
-      with:
-        name: main64.exe
-        path: main64.exe
+        command: "build"
+        target: ${{ matrix.platform.target }}
+        toolchain: ${{ matrix.toolchain }}
+        args: "--locked --release"
+        strip: true
 
     - name: Run tests
       run: ls -R
-        
-    - name: Create GitHub Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: v1.1.0-test2
-        release_name: version 1.1.0-test2
 
-    - name: Upload Release Artifact Pringgodani
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Rename binary (linux and macos)
+      run: mv target/${{ matrix.platform.target }}/release/main target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}
+      if: matrix.platform.os_name != 'Windows-x86_64'
+    - name: Rename binary (windows)
+      run: mv target/${{ matrix.platform.target }}/release/main.exe target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}
+      if: matrix.platform.os_name == 'Windows-x86_64'
+    - name: Rename binary (windows)
+      run: mv target/${{ matrix.platform.target }}/release/main.exe target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}
+      if: matrix.platform.os_name == 'Windows-i686'
+    - name: Generate SHA-256
+      run: shasum -a 256 target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }} | cut -d ' ' -f 1 > target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}.sha256
+    - name: Release binary and SHA-256 checksum to GitHub
+      uses: softprops/action-gh-release@v1
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./main32.exe/main.exe
-        asset_name: main32.exe
-        asset_content_type: application/x-msdownload
-    - name: Upload Release Artifact Pringgodani
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./main64.exe/main.exe
-        asset_name: main64.exe
-        asset_content_type: application/x-msdownload
-    - name: Upload Release Artifact Pringgodani
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./main64/main
-        asset_name: main64
-        asset_content_type: application/x-elf
+        files: |
+          target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}
+          target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}.sha256
