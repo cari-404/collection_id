@@ -5,6 +5,8 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+    tags:
+      - "v1.1.0-final"
 
 env:
   CARGO_TERM_COLOR: always
@@ -58,14 +60,12 @@ jobs:
       if: matrix.platform.os_name != 'Windows-x86_64' && matrix.platform.os_name != 'Windows-i686'
     - name: Rename binary (windows)
       run: mv target/${{ matrix.platform.target }}/release/main.exe target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}
-      if: matrix.platform.os_name == 'Windows-x86_64'
-    - name: Rename binary (windows)
-      run: mv target/${{ matrix.platform.target }}/release/main.exe target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}
-      if: matrix.platform.os_name == 'Windows-i686'
+      if: matrix.platform.os_name == 'Windows-x86_64' && matrix.platform.os_name == 'Windows-i686'
     - name: Generate SHA-256
       run: shasum -a 256 target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }} | cut -d ' ' -f 1 > target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}.sha256
     - name: Release binary and SHA-256 checksum to GitHub
       uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
       with:
         files: |
           target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}
