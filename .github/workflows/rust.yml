@@ -44,7 +44,11 @@ jobs:
           - stable
     steps:
     - uses: actions/checkout@v3
-    
+    - name: Dependency
+      run: |
+        sudo dpkg --add-architecture i386
+        sudo apt update
+        sudo apt install gcc-mingw-w64 libc6-dev-i386 libssl-dev:i386 -y
     - name: Build binary
       uses: houseabsolute/actions-rust-cross@v0
       with:
@@ -71,7 +75,7 @@ jobs:
     - name: Release binary and SHA-256 checksum to GitHub
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: v1.1.0-final2
+        tag_name: v1.1.0-final2.5
         files: |
           target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}
           target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}.sha256
