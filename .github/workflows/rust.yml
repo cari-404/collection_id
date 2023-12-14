@@ -22,7 +22,7 @@ jobs:
         platform:
           - os_name: Linux-aarch64
             os: ubuntu-20.04
-            target: aarch64-unknown-linux-musl
+            target: aarch64-unknown-linux-gnu
             bin: main-linux-arm64
           - os_name: Linux-x86_64
             os: ubuntu-20.04
@@ -55,7 +55,7 @@ jobs:
 
     - name: Rename binary (linux and macos)
       run: mv target/${{ matrix.platform.target }}/release/main target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}
-      if: matrix.platform.os_name != 'Windows-x86_64'
+      if: matrix.platform.os_name != 'Windows-x86_64 || Windows-i686'
     - name: Rename binary (windows)
       run: mv target/${{ matrix.platform.target }}/release/main.exe target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}
       if: matrix.platform.os_name == 'Windows-x86_64'
