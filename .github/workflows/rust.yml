@@ -65,7 +65,6 @@ jobs:
       run: shasum -a 256 target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }} | cut -d ' ' -f 1 > target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}.sha256
     - name: Release binary and SHA-256 checksum to GitHub
       uses: softprops/action-gh-release@v1
-      if: startsWith(github.ref, 'refs/tags/')
       with:
         files: |
           target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}
