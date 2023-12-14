@@ -28,6 +28,10 @@ jobs:
             os: ubuntu-20.04
             target: x86_64-unknown-linux-gnu
             bin: main-linux-amd64
+          - os_name: Linux-i686
+            os: ubuntu-20.04
+            target: i686-unknown-linux-gnu
+            bin: main-linux-i686
           - os_name: Windows-x86_64
             os: windows-latest
             target: x86_64-pc-windows-msvc
@@ -58,13 +62,16 @@ jobs:
       if: matrix.platform.os_name != 'Windows-x86_64' && matrix.platform.os_name != 'Windows-i686'
     - name: Rename binary (windows)
       run: mv target/${{ matrix.platform.target }}/release/main.exe target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}
-      if: matrix.platform.os_name == 'Windows-x86_64' && matrix.platform.os_name == 'Windows-i686'
+      if: matrix.platform.os_name == 'Windows-x86_64'
+    - name: Rename binary (windows)
+      run: mv target/${{ matrix.platform.target }}/release/main.exe target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}
+      if: matrix.platform.os_name == 'Windows-i686'
     - name: Generate SHA-256
       run: shasum -a 256 target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }} | cut -d ' ' -f 1 > target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}.sha256
     - name: Release binary and SHA-256 checksum to GitHub
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: v1.1.0-final
+        tag_name: v1.1.0-final2
         files: |
           target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}
           target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}.sha256
