@@ -54,6 +54,28 @@ jobs:
         sudo dpkg --add-architecture i386
         sudo apt update
         sudo apt install gcc-mingw-w64 libc6-dev-i386 libssl-dev:i386 -y
+    - name: Dependency
+      if: matrix.platform.os_name == 'Android-aarch64'
+      run: |
+        sudo apt update && sudo apt install -y nano git curl unzip python
+        mkdir $HOME/Android && \
+        cd $HOME/Android && \
+        mkdir sdk && \
+        wget -O sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip && \
+        unzip sdk-tools.zip && rm sdk-tools.zip && \
+        mv cmdline-tools ./sdk/tools && \
+        cd ./sdk/tools/bin && yes | ./sdkmanager --licenses && \
+        ./sdkmanager "build-tools;29.0.2" "patcher;v4" "platform-tools" "platforms;android-29" "sources;android-29" "ndk-bundle" && \
+        echo "export ANDROID_SDK=\$HOME/Android/sdk" >> $HOME/.bashrc && \
+        echo "export ANDROID_NDK=\$ANDROID_SDK/ndk-bundle" >> $HOME/.bashrc && \
+        echo "export PATH=\$PATH:\$ANDROID_SDK/platform-tools:\$ANDROID_SDK/tools/bin" >> $HOME/.bashrc && \
+        source $HOME/.bashrc && cd $HOME
+        cp config $HOME/.cargo/config
+    - name: Convert
+      if: matrix.platform.os_name != 'Windows-x86_64' && matrix.platform.os_name != 'Windows-i686' && matrix.platform.os_name != 'Linux-x86_64'
+      run: |
+        rm Cargo.toml
+        mv cross.toml Cargo.toml
     - name: Build binary
       uses: houseabsolute/actions-rust-cross@v0
       with:
@@ -80,7 +102,7 @@ jobs:
     - name: Release binary and SHA-256 checksum to GitHub
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: v1.1.0-final2.5
+        tag_name: v1.1.1-test
         files: |
           target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}
           target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}.sha256

@@ -1,9 +1,7 @@
 //This Is a first version of get_vouchers_by_collections
 //This version using api reqwest
-//Whats new In 1.1.0 :
-//Add argument "start end voucher_code"
-//Add argument "cookie"
-//Remove Tekan 'Enter' untuk keluar.
+//Whats new In 1.1.1 :
+//New detected Bug API
 
 use reqwest;
 use reqwest::ClientBuilder;
@@ -259,6 +257,11 @@ async fn some_function(start: &str, end: &str, v_code: &str, cookie_content: &st
 									}
 								}
 							}
+						}else{
+							println!("Bug API");
+							println!("Tidak ada Info vouchers ditemukan untuk collection_id: {}", current.to_string());
+							writeln!(&mut log_file, "Bug API").expect("Gagal menulis ke file log");
+							writeln!(&mut log_file, "collection_id: {}", current.to_string()).expect("Gagal menulis ke file log");
 						}
 					}
 				}else {
@@ -284,7 +287,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = std::env::args().collect();
 	
 	println!("-------------------------------------------");
-	println!("get_vouchers_by_collections [Version 1.1.0]");
+	println!("get_vouchers_by_collections [Version 1.1.1]");
 	println!("");
 	println!("Dapatkan Info terbaru di https://google.com");
 	println!("");
