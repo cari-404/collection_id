@@ -57,7 +57,8 @@ jobs:
     - name: Dependency
       if: matrix.platform.os_name == 'Android-aarch64'
       run: |
-        sudo apt update && sudo apt install -y nano git curl unzip python
+        java --version
+        sudo apt update && sudo apt install -y nano git curl unzip
         sudo apt install -y openjdk-17-jdk openjdk-17-jre
         mkdir $HOME/Android && \
         cd $HOME/Android && \
