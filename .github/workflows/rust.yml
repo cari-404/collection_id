@@ -88,9 +88,9 @@ jobs:
       run: |
         mkdir $HOME/Android/toolchains && \
         cd $HOME/Android/toolchains && \
-        $ANDROID_NDK/build/cmdline-tools/make_standalone_toolchain.py --api 26 --arch arm64 --install-dir ./arm64 && \
-        $ANDROID_NDK/build/cmdline-tools/make_standalone_toolchain.py --api 26 --arch arm --install-dir ./arm && \
-        $ANDROID_NDK/build/cmdline-tools/make_standalone_toolchain.py --api 26 --arch x86 --install-dir ./x86
+        $ANDROID_NDK/build/tools/make_standalone_toolchain.py --api 26 --arch arm64 --install-dir ./arm64 && \
+        $ANDROID_NDK/build/tools/make_standalone_toolchain.py --api 26 --arch arm --install-dir ./arm && \
+        $ANDROID_NDK/build/tools/make_standalone_toolchain.py --api 26 --arch x86 --install-dir ./x86
     - name: Dependency
       if: matrix.platform.os_name == 'Android-aarch64'
       run: |
