@@ -81,7 +81,7 @@ jobs:
     - name: toolchains
       if: matrix.platform.os_name == 'Android-aarch64'
       run: |
-        mdkdir $HOME/Android/toolchains && \
+        mkdir $HOME/Android/toolchains && \
         cd $HOME/Android/toolchains && \
         $ANDROID_NDK/build/cmdline-tools/make_standalone_toolchain.py --api 26 --arch arm64 --install-dir ./arm64 && \
         $ANDROID_NDK/build/cmdline-tools/make_standalone_toolchain.py --api 26 --arch arm --install-dir ./arm && \
