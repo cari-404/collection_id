@@ -69,7 +69,6 @@ jobs:
         mkdir sdk 
         wget -O sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip 
         unzip sdk-tools.zip && rm sdk-tools.zip 
-        mv cmdline-tools ./sdk/tools
         mv cmdline-tools latest
         mkdir sdk
         mkdir sdk/cmdline-tools
