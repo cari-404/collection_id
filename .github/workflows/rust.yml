@@ -54,14 +54,16 @@ jobs:
         sudo dpkg --add-architecture i386
         sudo apt update
         sudo apt install gcc-mingw-w64 libc6-dev-i386 libssl-dev:i386 -y
+    - uses: actions/setup-java@v4
+      if: matrix.platform.os_name == 'Android-aarch64'
+      with:
+        distribution: 'temurin' # See 'Supported distributions' for available options
+        java-version: '17'
     - name: Dependency
       if: matrix.platform.os_name == 'Android-aarch64'
       run: |
         java --version
         sudo apt update && sudo apt install -y nano git curl unzip
-        sudo apt search jre
-        sudo apt install -y openjdk-17-jdk openjdk-17-jre
-        java --version
         mkdir $HOME/Android && \
         cd $HOME/Android && \
         mkdir sdk && \
