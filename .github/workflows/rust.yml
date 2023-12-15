@@ -64,17 +64,21 @@ jobs:
       run: |
         java --version
         sudo apt update && sudo apt install -y nano git curl unzip
-        mkdir $HOME/Android && \
-        cd $HOME/Android && \
-        mkdir sdk && \
-        wget -O sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip && \
-        unzip sdk-tools.zip && rm sdk-tools.zip && \
-        mv cmdline-tools ./sdk/tools && \
-        cd ./sdk/tools/bin && yes | ./sdkmanager --licenses && \
-        ./sdkmanager "build-tools;29.0.2" "patcher;v4" "platform-tools" "platforms;android-29" "sources;android-29" "ndk-bundle" && \
-        echo "export ANDROID_SDK=\$HOME/Android/sdk" >> $HOME/.bashrc && \
-        echo "export ANDROID_NDK=\$ANDROID_SDK/ndk-bundle" >> $HOME/.bashrc && \
-        echo "export PATH=\$PATH:\$ANDROID_SDK/platform-tools:\$ANDROID_SDK/tools/bin" >> $HOME/.bashrc && \
+        mkdir $HOME/Android 
+        cd $HOME/Android 
+        mkdir sdk 
+        wget -O sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip 
+        unzip sdk-tools.zip && rm sdk-tools.zip 
+        mv cmdline-tools ./sdk/tools
+        mv cmdline-tools latest
+        mkdir sdk
+        mkdir sdk/cmdline-tools
+        mv latest sdk/cmdline-tools
+        cd ./sdk/cmdline-tools/latest/bin && yes | ./sdkmanager --licenses 
+        ./sdkmanager "build-tools;29.0.2" "patcher;v4" "platform-tools" "platforms;android-29" "sources;android-29" "ndk-bundle" 
+        echo "export ANDROID_SDK=\$HOME/Android/sdk" >> $HOME/.bashrc 
+        echo "export ANDROID_NDK=\$ANDROID_SDK/ndk-bundle" >> $HOME/.bashrc 
+        echo "export PATH=\$PATH:\$ANDROID_SDK/platform-tools:\$ANDROID_SDK/tools/bin" >> $HOME/.bashrc 
         source $HOME/.bashrc && cd $HOME
         cp config $HOME/.cargo/config
     - name: Convert
