@@ -78,6 +78,10 @@ jobs:
         echo "export ANDROID_NDK=\$ANDROID_SDK/ndk-bundle" >> $HOME/.bashrc 
         echo "export PATH=\$PATH:\$ANDROID_SDK/platform-tools:\$ANDROID_SDK/cmdline-tools/latest/bin" >> $HOME/.bashrc 
         source $HOME/.bashrc && cd $HOME
+    - name: directory
+      if: matrix.platform.os_name == 'Android-aarch64'
+        cd /usr/local/lib/android/sdk/ndk
+        ls -R
     - name: toolchains
       if: matrix.platform.os_name == 'Android-aarch64'
       run: |
