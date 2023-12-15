@@ -86,6 +86,7 @@ jobs:
     - name: toolchains
       if: matrix.platform.os_name == 'Android-aarch64'
       run: |
+        find ~ -name libunwind.a
         mkdir $HOME/Android/toolchains && \
         cd $HOME/Android/toolchains && \
         $ANDROID_NDK/build/tools/make_standalone_toolchain.py --api 26 --arch arm64 --install-dir ./arm64 && \
