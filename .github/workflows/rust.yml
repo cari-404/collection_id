@@ -73,11 +73,14 @@ jobs:
         mkdir sdk/cmdline-tools
         mv latest sdk/cmdline-tools
         cd ./sdk/cmdline-tools/latest/bin && yes | ./sdkmanager --licenses 
-        ./sdkmanager "build-tools;29.0.2" "patcher;v4" "platform-tools" "platforms;android-29" "sources;android-29" "ndk-bundle" 
+        ./sdkmanager "build-tools;29.0.3" "platform-tools" "platforms;android-29" "sources;android-29" "ndk-bundle" 
         echo "export ANDROID_SDK=\$HOME/Android/sdk" >> $HOME/.bashrc 
         echo "export ANDROID_NDK=\$ANDROID_SDK/ndk-bundle" >> $HOME/.bashrc 
         echo "export PATH=\$PATH:\$ANDROID_SDK/platform-tools:\$ANDROID_SDK/tools/bin" >> $HOME/.bashrc 
         source $HOME/.bashrc && cd $HOME
+    - name: Dependency
+      if: matrix.platform.os_name == 'Android-aarch64'
+      run: |
         cp config $HOME/.cargo/config
     - name: Convert
       if: matrix.platform.os_name != 'Windows-x86_64' && matrix.platform.os_name != 'Windows-i686' && matrix.platform.os_name != 'Linux-x86_64'
