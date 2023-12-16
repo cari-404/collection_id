@@ -81,6 +81,7 @@ jobs:
     - name: directory
       if: matrix.platform.os_name == 'Android-aarch64'
       run: |
+        cd $HOME/Android
         cd ./sdk/cmdline-tools/latest/bin
         sdkmanager --list_installed
         cd /usr/local/lib/android/sdk/ndk
