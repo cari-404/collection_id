@@ -113,7 +113,7 @@ jobs:
         command: "build"
         target: ${{ matrix.platform.target }}
         toolchain: ${{ matrix.toolchain }}
-        args: "--release"
+        args: "--release -v"
         strip: true
 
     - name: Run tests
