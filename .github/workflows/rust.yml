@@ -73,7 +73,7 @@ jobs:
         mkdir sdk/cmdline-tools
         mv latest sdk/cmdline-tools
         cd ./sdk/cmdline-tools/latest/bin && yes | ./sdkmanager --licenses 
-        ./sdkmanager "build-tools;29.0.3" "platform-tools" "platforms;android-29" "sources;android-29" "ndk-bundle" 
+        ./sdkmanager "build-tools;34.0.0" "platform-tools" "platforms;android-34" "sources;android-34" "ndk-bundle" 
         echo "export ANDROID_SDK=\$HOME/Android/sdk" >> $HOME/.bashrc 
         echo "export ANDROID_NDK=\$ANDROID_SDK/ndk-bundle" >> $HOME/.bashrc 
         echo "export PATH=\$PATH:\$ANDROID_SDK/platform-tools:\$ANDROID_SDK/cmdline-tools/latest/bin" >> $HOME/.bashrc 
@@ -92,9 +92,9 @@ jobs:
         find ~ -name libunwind.a
         mkdir $HOME/Android/toolchains 
         cd $HOME/Android/toolchains 
-        $ANDROID_NDK/build/tools/make_standalone_toolchain.py --api 26 --arch arm64 --install-dir ./arm64 
-        $ANDROID_NDK/build/tools/make_standalone_toolchain.py --api 26 --arch arm --install-dir ./arm 
-        $ANDROID_NDK/build/tools/make_standalone_toolchain.py --api 26 --arch x86 --install-dir ./x86
+        $ANDROID_NDK/build/tools/make_standalone_toolchain.py --api 22 --arch arm64 --install-dir ./arm64 
+        $ANDROID_NDK/build/tools/make_standalone_toolchain.py --api 22 --arch arm --install-dir ./arm 
+        $ANDROID_NDK/build/tools/make_standalone_toolchain.py --api 22--arch x86 --install-dir ./x86
         cd /usr/local/lib/android/sdk/ndk
         ls -R
     - name: Dependency
