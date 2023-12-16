@@ -81,17 +81,20 @@ jobs:
     - name: directory
       if: matrix.platform.os_name == 'Android-aarch64'
       run: |
+        sdkmanager --list_installed
         cd /usr/local/lib/android/sdk/ndk
         ls -R
     - name: toolchains
       if: matrix.platform.os_name == 'Android-aarch64'
       run: |
         find ~ -name libunwind.a
-        mkdir $HOME/Android/toolchains && \
-        cd $HOME/Android/toolchains && \
-        $ANDROID_NDK/build/tools/make_standalone_toolchain.py --api 26 --arch arm64 --install-dir ./arm64 && \
-        $ANDROID_NDK/build/tools/make_standalone_toolchain.py --api 26 --arch arm --install-dir ./arm && \
+        mkdir $HOME/Android/toolchains 
+        cd $HOME/Android/toolchains 
+        $ANDROID_NDK/build/tools/make_standalone_toolchain.py --api 26 --arch arm64 --install-dir ./arm64 
+        $ANDROID_NDK/build/tools/make_standalone_toolchain.py --api 26 --arch arm --install-dir ./arm 
         $ANDROID_NDK/build/tools/make_standalone_toolchain.py --api 26 --arch x86 --install-dir ./x86
+        cd /usr/local/lib/android/sdk/ndk
+        ls -R
     - name: Dependency
       if: matrix.platform.os_name == 'Android-aarch64'
       run: |
