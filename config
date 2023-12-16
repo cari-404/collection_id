@@ -1,11 +1,11 @@
 [target.aarch64-linux-android]
 ar = "$HOME/Android/toolchains/arm64/bin/aarch64-linux-android-ar"
-linker = "$HOME/Android/toolchains/arm64/bin/aarch64-linux-android-clang"
+linker = "$HOME/Android/toolchains/arm64/bin/aarch64-linux-android-gcc"
 
 [target.armv7-linux-androideabi]
 ar = "$HOME/Android/toolchains/arm/bin/arm-linux-androideabi-ar"
-linker = "$HOME/Android/toolchains/arm/bin/arm-linux-androideabi-clang"
+linker = "$HOME/Android/toolchains/arm/bin/arm-linux-androideabi-gcc"
 
 [target.i686-linux-android]
 ar = "$HOME/Android/toolchains/x86/bin/i686-linux-android-ar"
-linker = "$HOME/Android/toolchains/x86/bin/i686-linux-android-clang"
+linker = "$HOME/Android/toolchains/x86/bin/i686-linux-android-gcc"
