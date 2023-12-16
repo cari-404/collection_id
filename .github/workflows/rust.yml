@@ -95,7 +95,6 @@ jobs:
         $ANDROID_NDK/build/tools/make_standalone_toolchain.py --api 21 --arch arm64 --install-dir ./arm64 
         $ANDROID_NDK/build/tools/make_standalone_toolchain.py --api 21 --arch arm --install-dir ./arm 
         $ANDROID_NDK/build/tools/make_standalone_toolchain.py --api 21 --arch x86 --install-dir ./x86
-        cd /usr/local/lib/android/sdk/ndk
         ls -R
     - name: Dependency
       if: matrix.platform.os_name == 'Android-aarch64'
