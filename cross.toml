@@ -11,6 +11,9 @@ path = "src/main.rs"
 #name = "hypermain"
 #path = "src/hypermain.rs"
 
+[rust]
+llvm-libunwind = 'no'
+
 [profile.release]
 opt-level = "s"  # Optimize for size.
 lto = true          # Enable Link Time Optimization
