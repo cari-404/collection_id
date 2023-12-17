@@ -73,7 +73,7 @@ jobs:
         mkdir sdk/cmdline-tools
         mv latest sdk/cmdline-tools
         cd ./sdk/cmdline-tools/latest/bin && yes | ./sdkmanager --licenses 
-        ./sdkmanager "build-tools;29" "platform-tools" "platforms;android-29" "sources;android-29" "ndk-bundle;21.4.7075529" 
+        ./sdkmanager "build-tools;29.0.3" "platform-tools" "platforms;android-29" "sources;android-29" "ndk-bundle;21.4.7075529" 
         echo "export ANDROID_SDK=\$HOME/Android/sdk" >> $HOME/.bashrc 
         echo "export ANDROID_NDK=\$ANDROID_SDK/ndk-bundle" >> $HOME/.bashrc 
         echo "export PATH=\$PATH:\$ANDROID_SDK/platform-tools:\$ANDROID_SDK/cmdline-tools/latest/bin" >> $HOME/.bashrc 
