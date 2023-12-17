@@ -117,13 +117,19 @@ jobs:
         strip: true
     - name: Build binary
       if: matrix.platform.os_name == 'Android-aarch64'
-      uses: houseabsolute/actions-rust-cross@v0
+      uses: actions-rs/toolchain@v1
       with:
-        command: "build"
-        target: ${{ matrix.platform.target }}
-        toolchain: nightly
-        args: "--release -Z build-std"
-        strip: true
+          toolchain: stable
+          override: true
+          components: rustfmt, clippy
+          target: ${{ matrix.platform.target }}
+
+    - name: install
+      if: matrix.platform.os_name == 'Android-aarch64'
+      run: |
+        cargo install cargo-ndk
+        rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android i686-linux-android
+        cargo ndk -t armeabi-v7a -t arm64-v8a build --release
 
     - name: Run tests
       run: ls -R
