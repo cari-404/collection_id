@@ -108,6 +108,16 @@ jobs:
         mv cross.toml Cargo.toml
     - name: Build binary
       uses: houseabsolute/actions-rust-cross@v0
+      if: matrix.platform.os_name != 'Android-aarch64'
+      with:
+        command: "build"
+        target: ${{ matrix.platform.target }}
+        toolchain: ${{ matrix.toolchain }}
+        args: "--release"
+        strip: true
+    - name: Build binary
+      if: matrix.platform.os_name == 'Android-aarch64'
+      uses: houseabsolute/actions-rust-cross@v0
       with:
         command: "build"
         target: ${{ matrix.platform.target }}
