@@ -54,53 +54,7 @@ jobs:
         sudo dpkg --add-architecture i386
         sudo apt update
         sudo apt install gcc-mingw-w64 libc6-dev-i386 libssl-dev:i386 -y
-    - uses: actions/setup-java@v4
-      if: matrix.platform.os_name == 'Android-aarch64'
-      with:
-        distribution: 'temurin' # See 'Supported distributions' for available options
-        java-version: '17'
-    - name: Dependency
-      if: matrix.platform.os_name == 'Android-aarch64'
-      run: |
-        java --version
-        sudo apt update && sudo apt install -y nano git curl unzip
-        mkdir $HOME/Android 
-        cd $HOME/Android 
-        mkdir sdk 
-        wget -O sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip 
-        unzip sdk-tools.zip && rm sdk-tools.zip 
-        mv cmdline-tools latest
-        mkdir sdk/cmdline-tools
-        mv latest sdk/cmdline-tools
-        cd ./sdk/cmdline-tools/latest/bin && yes | ./sdkmanager --licenses 
-        ./sdkmanager "build-tools;29.0.3" "platform-tools" "platforms;android-29" "sources;android-29" "ndk;21.4.7075529" 
-        echo "export ANDROID_SDK=\$HOME/Android/sdk" >> $HOME/.bashrc 
-        echo "export ANDROID_NDK=\$ANDROID_SDK/ndk-bundle" >> $HOME/.bashrc 
-        echo "export PATH=\$PATH:\$ANDROID_SDK/platform-tools:\$ANDROID_SDK/cmdline-tools/latest/bin" >> $HOME/.bashrc 
-        source $HOME/.bashrc && cd $HOME
-    - name: directory
-      if: matrix.platform.os_name == 'Android-aarch64'
-      run: |
-        cd $HOME/Android
-        cd ./sdk/cmdline-tools/latest/bin
-        ./sdkmanager --list_installed
-        cd /usr/local/lib/android/sdk/ndk
-        ls -R
-    - name: toolchains
-      if: matrix.platform.os_name == 'Android-aarch64'
-      run: |
-        find ~ -name libunwind.a
-        mkdir $HOME/Android/toolchains 
-        cd $HOME/Android/toolchains 
-        $ANDROID_NDK/build/tools/make_standalone_toolchain.py --api 29 --arch arm64 --install-dir ./arm64 
-        $ANDROID_NDK/build/tools/make_standalone_toolchain.py --api 29 --arch arm --install-dir ./arm 
-        $ANDROID_NDK/build/tools/make_standalone_toolchain.py --api 29 --arch x86 --install-dir ./x86
-        ls -R
-    - name: Dependency
-      if: matrix.platform.os_name == 'Android-aarch64'
-      run: |
-        sudo apt install libunwind-dev android-libunwind-dev android-libunwind libunwind8-dev libunwind8 -y
-        cp config $HOME/.cargo/config
+
     - name: Convert
       if: matrix.platform.os_name != 'Windows-x86_64' && matrix.platform.os_name != 'Windows-i686' && matrix.platform.os_name != 'Linux-x86_64'
       run: |
