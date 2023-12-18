@@ -10,7 +10,7 @@ winresource = "0.1"
 
 [package.metadata.winresource]
 LegalCopyright = "Copyright @ 2023 Paijo"
-OriginalFilename = "collection.exe""
+OriginalFilename = "collection.exe"
 
 [profile.release]
 opt-level = "s"  # Optimize for size.
