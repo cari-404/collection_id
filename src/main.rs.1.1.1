@@ -1,7 +1,5 @@
 //This Is a first version of get_vouchers_by_collections
 //This version using api reqwest
-//Whats new In 1.1.2 :
-//New argument for multi Accounts
 //Whats new In 1.1.1 :
 //New detected Bug API
 
@@ -43,18 +41,6 @@ async fn process_arguments(start: &str, end: &str, v_code: &str) -> Result<()> {
     let file_path = format!("./akun/{}", selected_file.trim());
     let mut cookie_content = String::new();
     std::fs::File::open(&file_path)?.read_to_string(&mut cookie_content)?;
-
-    // Process HTTP with common function
-    some_function(start, end, v_code, &cookie_content, &selected_file).await?;
-
-    Ok(())
-}
-
-async fn process_arguments2(start: &str, end: &str, v_code: &str, selected_file: &str) -> Result<()> {
-    // Read the content of "akun.conf"
-    let file_path = format!("./akun/{}", selected_file);
-    let mut cookie_content = String::new();
-    File::open(&file_path)?.read_to_string(&mut cookie_content)?;
 
     // Process HTTP with common function
     some_function(start, end, v_code, &cookie_content, &selected_file).await?;
@@ -301,7 +287,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = std::env::args().collect();
 	
 	println!("-------------------------------------------");
-	println!("get_vouchers_by_collections [Version 1.1.2]");
+	println!("get_vouchers_by_collections [Version 1.1.1]");
 	println!("");
 	println!("Dapatkan Info terbaru di https://google.com");
 	println!("");
@@ -325,18 +311,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 			let end = &args[2];
 			let v_code = &args[3];
 			process_arguments(start, end, v_code).await?;
-        }
-        5 => {
-            // Metode Cepat: Menjalankan main.exe dengan empat argumen
-            println!("Metode Cepat: Menjalankan main.exe dengan empat argumen.");
-            
-			// Case: Command-line arguments provided (e.g., "main.exe 12905192072 12905200000 DC10010RB110 asu.txt")
-			let start = &args[1];
-			let end = &args[2];
-			let v_code = &args[3];
-			let selected_file = &args[4];
-			process_arguments2(start, end, v_code, selected_file).await?;
-		}
+         }
         _ => {
             // Case: No command-line arguments (old manual input method)
             manual_input().await?;

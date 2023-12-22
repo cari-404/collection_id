@@ -44,6 +44,10 @@ jobs:
             os: windows-latest
             target: i686-pc-windows-msvc
             bin: main-i686.exe
+          - os_name: Windows-i586
+            os: windows-latest
+            target: i586-pc-windows-msvc
+            bin: main-i586.exe
         toolchain:
           - stable
     steps:
@@ -102,7 +106,7 @@ jobs:
     - name: Release binary and SHA-256 checksum to GitHub
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: v1.1.1-test
+        tag_name: v1.1.2
         files: |
           target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}
           target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}.sha256
