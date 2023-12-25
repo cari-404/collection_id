@@ -1,12 +1,16 @@
 //This Is a first version of get_vouchers_by_collections
 //This version using api reqwest
+//Whats new In 1.1.3 :
+//New Function API 1
+//New detected for Bug API 2
 //Whats new In 1.1.2 :
 //New argument for multi Accounts
 //Whats new In 1.1.1 :
-//New detected Bug API
+//New detected for Bug API 1
 
 use reqwest;
 use reqwest::ClientBuilder;
+use reqwest::header::HeaderMap;
 use std::io;
 use serde::Serialize;
 use serde_json;
@@ -209,7 +213,7 @@ async fn some_function(start: &str, end: &str, v_code: &str, cookie_content: &st
             let response = client
                 .post("https://shopee.co.id/api/v1/microsite/get_vouchers_by_collections")
                 .header("Content-Type", "application/json")
-                .headers(headers)
+                .headers(headers.clone())
                 .body(json_body)
 				.version(Version::HTTP_2) 
                 .send()
@@ -272,10 +276,10 @@ async fn some_function(start: &str, end: &str, v_code: &str, cookie_content: &st
 								}
 							}
 						}else{
-							println!("Bug API");
-							println!("Tidak ada Info vouchers ditemukan untuk collection_id: {}", current.to_string());
-							writeln!(&mut log_file, "Bug API").expect("Gagal menulis ke file log");
-							writeln!(&mut log_file, "collection_id: {}", current.to_string()).expect("Gagal menulis ke file log");
+							println!("API Checker 1");
+							writeln!(&mut log_file, "API Checker 1").expect("Gagal menulis ke file log");
+							let cid_1 = current.to_string();
+							api_1(&cid_1, &headers.clone(), v_code, &log_file).await?;
 						}
 					}
 				}else {
@@ -295,13 +299,117 @@ async fn some_function(start: &str, end: &str, v_code: &str, cookie_content: &st
     Ok(())	
 }
 
+async fn api_1(cid_1: &str, headers: &HeaderMap, v_code: &str, mut log_file: &File) -> Result<()> {
+	let cloned_headers = headers.clone();
+	let voucher_request = VoucherCollectionRequest {
+		collection_id: cid_1.to_string(),
+		component_type: 1,
+		component_id: 1694165901230,
+		limit: 100,
+		microsite_id: 58982,
+		offset: 0,
+		number_of_vouchers_per_row: 1,
+	};
+	// Bentuk struct JsonRequest
+	let json_request = JsonRequest {
+		voucher_collection_request_list: vec![voucher_request],
+	};
+
+	// Convert struct to JSON
+	let json_body = serde_json::to_string(&json_request)?;
+
+	let client = ClientBuilder::new()
+		.gzip(true)
+		.use_rustls_tls() // Use Rustls for HTTPS
+		.build()?;
+
+	// Buat permintaan HTTP POST
+	let response = client
+		.post("https://shopee.co.id/api/v1/microsite/get_vouchers_by_collections")
+		.header("Content-Type", "application/json")
+		.headers(cloned_headers)
+		.body(json_body)
+		.version(Version::HTTP_2) 
+		.send()
+		.await?;
+	// Check for HTTP status code indicating an error
+	//let http_version = response.version(); 		// disable output features
+	//println!("HTTP Version: {:?}", http_version); // disable output features
+	let status = response.status();
+	let text = response.text().await?;	
+	if status == reqwest::StatusCode::OK {
+		let hasil: Value = serde_json::from_str(&text)?;
+		// Access specific values using serde_json::Value methods
+		if let Some(data_array) = hasil.get("data").and_then(|data| data.as_array()) {
+			for data_value in data_array {
+				if let Some(vouchers_array) = data_value.get("vouchers").and_then(|vouchers| vouchers.as_array()) {
+					for voucher_value in vouchers_array {
+						if let Some(voucher_obj) = voucher_value.get("voucher").and_then(|voucher| voucher.as_object()) {
+							if let Some(voucher_identifier_obj) = voucher_obj.get("voucher_identifier").and_then(|vi| vi.as_object()) {
+								if let Some(v_code_api) = voucher_identifier_obj.get("voucher_code").and_then(|vc| vc.as_str()) {
+									// Use a different variable name to avoid shadowing the outer v_code
+									let voucher_code_value = v_code_api.to_string();
+									let promotion_id = voucher_identifier_obj.get("promotion_id").and_then(|pi| pi.as_i64()).unwrap_or(0);
+									let voucher_code = voucher_identifier_obj.get("voucher_code").and_then(|vc| vc.as_str()).unwrap_or("");
+									let signature = voucher_identifier_obj.get("signature").and_then(|s| s.as_str()).unwrap_or("");
+									let collection_id = data_value.get("collection_id").and_then(|ci| ci.as_str()).unwrap_or("");
+									// Check if v_code matches the found voucher_code
+									if v_code.trim() == voucher_code_value {
+										let promotion_id_str = promotion_id.to_string();
+										// Set the flag to true when a voucher code is found
+										println!("{}", Colour::Green.paint("Voucher ditemukan:"));
+										println!("promotion_id: {}", Colour::Green.paint(promotion_id_str));
+										println!("voucher_code: {}", Colour::Green.paint(voucher_code));
+										println!("signature: {}", Colour::Green.paint(signature));
+										println!("collection_id: {}", Colour::Green.paint(collection_id));
+										// Simpan data voucher yang ditemukan ke dalam berkas log dengan nama berkas yang baru dibuat
+										writeln!(&mut log_file, "Voucher ditemukan:").expect("Gagal menulis ke file log");
+										writeln!(&mut log_file, "promotion_id: {}", promotion_id).expect("Gagal menulis ke file log");
+										writeln!(&mut log_file, "voucher_code: {}", voucher_code).expect("Gagal menulis ke file log");
+										writeln!(&mut log_file, "signature: {}", signature).expect("Gagal menulis ke file log");
+										writeln!(&mut log_file, "collection_id: {}", collection_id).expect("Gagal menulis ke file log");
+
+										// Exit the program if a matching voucher code is found
+										println!("Voucher code found. Program selesai.");
+										return Ok(());
+									} else {
+										println!("voucher_code yang ditemukan: {}", Colour::Yellow.paint(voucher_code));
+										println!("collection_id: {}", Colour::Green.paint(collection_id));
+										writeln!(&mut log_file, "voucher_code yang ditemukan: {}", voucher_code).expect("Gagal menulis ke file log");
+										writeln!(&mut log_file, "collection_id: {}", collection_id).expect("Gagal menulis ke file log");
+									}
+								}
+							}
+						}
+					}
+				}else{
+					println!("Bug API 2");
+					println!("Tidak ada Info vouchers ditemukan untuk collection_id: {}", cid_1);
+					writeln!(&mut log_file, "Bug API 2").expect("Gagal menulis ke file log");
+					writeln!(&mut log_file, "collection_id: {}", cid_1).expect("Gagal menulis ke file log");				
+				}
+			}
+		}else {
+			println!("Tidak ada data ditemukan untuk collection_id: {}", cid_1);
+			writeln!(&mut log_file, "collection_id: {}", cid_1).expect("Gagal menulis ke file log");
+		}
+	}else {
+		println!("POST request gagal untuk collection_id:: {}", cid_1);
+		println!("Status: {}", status);
+	}
+	Ok(())	
+}
+
+
+
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Check if there are command line arguments
     let args: Vec<String> = std::env::args().collect();
 	
 	println!("-------------------------------------------");
-	println!("get_vouchers_by_collections [Version 1.1.2]");
+	println!("get_vouchers_by_collections [Version 1.1.3]");
 	println!("");
 	println!("Dapatkan Info terbaru di https://google.com");
 	println!("");
