@@ -22,6 +22,7 @@ use std::fs::File;
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::io::prelude::*;
+use std::process;
 use ansi_term::Colour;
 use chrono::Utc;
 
@@ -371,7 +372,7 @@ async fn api_1(cid_1: &str, headers: &HeaderMap, v_code: &str, mut log_file: &Fi
 
 										// Exit the program if a matching voucher code is found
 										println!("Voucher code found. Program selesai.");
-										return Ok(());
+										process::exit(1);
 									} else {
 										println!("voucher_code yang ditemukan: {}", Colour::Yellow.paint(voucher_code));
 										println!("collection_id: {}", Colour::Green.paint(collection_id));
