@@ -1,15 +1,14 @@
 /*
 This Is a first version of get_vouchers_by_collections
 This version using api reqwest
+Whats new In 1.1.6 :
+fix included ansicode on logs
 Whats new In 1.1.5 :
 Add function interactive_print
 Whats new In 1.1.4 :
 Add progress bar
 Add function print_and_log only for color text
 remove ansiterm
-Whats new In 1.1.3 :
-New Function API 1
-New detected for Bug API 2
 */
 
 use reqwest;
@@ -126,15 +125,16 @@ async fn manual_input() -> Result<()> {
     Ok(())
 }
 
-fn print_and_log(pb: &ProgressBar, mut log_file: &File, message: &str) {
+fn print_and_log(pb: &ProgressBar, mut log_file: &File, mes1: &str, color: &str, mes2: &str, logmes: &str) {
+	let reset_color = "\x1b[0m";
 	// Menampilkan output berwarna pada terminal
-	interactive_print(pb, &format!("{}", message));
+	interactive_print(pb, &format!("{}{}{}{}", mes1, color, mes2, reset_color));
 
     // Menyimpan data ke dalam berkas log
-    writeln!(log_file, "{}", message).expect("Gagal menulis ke file log");
+    writeln!(log_file, "{}{}", logmes, mes2).expect("Gagal menulis ke file log");
 }
 
-fn interactive_print(pb: &ProgressBar, message: &str,) {
+fn interactive_print(pb: &ProgressBar, message: &str) {
 	let is_interactive = atty::is(atty::Stream::Stdout);
 	if is_interactive {
 		pb.println(format!("{}", message));
@@ -146,7 +146,6 @@ fn interactive_print(pb: &ProgressBar, message: &str,) {
 async fn some_function(start: &str, end: &str, v_code: &str, cookie_content: &str, selected_file: &str) -> Result<()> {
 	let green = "\x1b[32m";
     let yellow = "\x1b[33m";
-    let reset_color = "\x1b[0m";
 	let formatted_datetime = Utc::now().format("%Y-%m-%d_%H-%M-%S").to_string();
 	// Mengonversi nama akun menjadi format folder yang sesuai
     let header_folder = format!("./header/{}/af-ac-enc-sz-token.txt", selected_file);
@@ -281,30 +280,30 @@ async fn some_function(start: &str, end: &str, v_code: &str, cookie_content: &st
 											if v_code.trim() == voucher_code_value {
 												let promotion_id_str = promotion_id.to_string();
 												// Set the flag to true when a voucher code is found
-												print_and_log(&pb, &mut log_file, &format!("Voucher ditemukan:"));
-												print_and_log(&pb, &mut log_file, &format!("promotion_id: {}{}{}", green, promotion_id_str, reset_color));
-												print_and_log(&pb, &mut log_file, &format!("voucher_code: {}{}{}", green, voucher_code, reset_color));
-												print_and_log(&pb, &mut log_file, &format!("signature: {}{}{}", green, signature, reset_color));
-												print_and_log(&pb, &mut log_file, &format!("collection_id: {}{}{}", green, collection_id, reset_color));
+												print_and_log(&pb, &mut log_file, &format!("Voucher ditemukan:"), "", "", &format!("Voucher ditemukan:"));
+												print_and_log(&pb, &mut log_file, &format!("promotion_id: "), green, &promotion_id_str, &format!("promotion_id: "));
+												print_and_log(&pb, &mut log_file, &format!("voucher_code: "), green, voucher_code, &format!("voucher_code: "));
+												print_and_log(&pb, &mut log_file, &format!("signature: "), green, signature, &format!("signature: "));
+												print_and_log(&pb, &mut log_file, &format!("collection_id: "), green, collection_id, &format!("collection_id: "));
 												// Exit the program if a matching voucher code is found
 												interactive_print(&pb, &format!("Voucher code found. Program selesai."));
 												return Ok(());
 											} else {
-												print_and_log(&pb, &mut log_file, &format!("voucher_code yang ditemukan: {}{}{}", yellow, voucher_code, reset_color));
-												print_and_log(&pb, &mut log_file, &format!("collection_id: {}{}{}", green, collection_id, reset_color));
+												print_and_log(&pb, &mut log_file, &format!("voucher_code yang ditemukan: "), yellow, voucher_code, &format!("voucher_code yang ditemukan: "));
+												print_and_log(&pb, &mut log_file, &format!("collection_id: "), green, collection_id, &format!("collection_id: "));
 											}
 										}
 									}
 								}
 							}
 						}else{
-							print_and_log(&pb, &mut log_file, &format!("API Checker 1"));
+							print_and_log(&pb, &mut log_file, &format!("API Checker 1"), "", "", &format!("API Checker 1"));
 							let cid_1 = current.to_string();
 							api_1(&pb, &cid_1, &headers.clone(), v_code, &log_file).await?;
 						}
 					}
 				}else {
-					print_and_log(&pb, &mut log_file, &format!("Tidak ada data ditemukan untuk collection_id: {}", current.to_string()));
+					print_and_log(&pb, &mut log_file, &format!("Tidak ada data ditemukan untuk collection_id: "), "", &current.to_string(), &format!("collection_id: "));
 				}
 			}else {
 				interactive_print(&pb, &format!("POST request gagal untuk collection_id:: {}", current.to_string()));
@@ -324,7 +323,6 @@ async fn some_function(start: &str, end: &str, v_code: &str, cookie_content: &st
 async fn api_1(pb: &ProgressBar, cid_1: &str, headers: &HeaderMap, v_code: &str, mut log_file: &File) -> Result<()> {
 	let green = "\x1b[32m";
     let yellow = "\x1b[33m";
-	let reset_color = "\x1b[0m";
 	let cloned_headers = headers.clone();
 	let voucher_request = VoucherCollectionRequest {
 		collection_id: cid_1.to_string(),
@@ -382,30 +380,30 @@ async fn api_1(pb: &ProgressBar, cid_1: &str, headers: &HeaderMap, v_code: &str,
 									if v_code.trim() == voucher_code_value {
 										let promotion_id_str = promotion_id.to_string();
 										// Set the flag to true when a voucher code is found
-										print_and_log(&pb, &mut log_file, &format!("Voucher ditemukan:"));
-										print_and_log(&pb, &mut log_file, &format!("promotion_id: {}{}{}", green, promotion_id_str, reset_color));
-										print_and_log(&pb, &mut log_file, &format!("voucher_code: {}{}{}", green, voucher_code, reset_color));
-										print_and_log(&pb, &mut log_file, &format!("signature: {}{}{}", green, signature, reset_color));
-										print_and_log(&pb, &mut log_file, &format!("collection_id: {}{}{}", green, collection_id, reset_color));
+										print_and_log(&pb, &mut log_file, &format!("Voucher ditemukan:"), "", "", &format!("Voucher ditemukan:"));
+										print_and_log(&pb, &mut log_file, &format!("promotion_id: "), green, &promotion_id_str, &format!("promotion_id: "));
+										print_and_log(&pb, &mut log_file, &format!("voucher_code: "), green, voucher_code, &format!("voucher_code: "));
+										print_and_log(&pb, &mut log_file, &format!("signature: "), green, signature, &format!("signature: "));
+										print_and_log(&pb, &mut log_file, &format!("collection_id: "), green, collection_id, &format!("collection_id: "));
 
 										// Exit the program if a matching voucher code is found
 										interactive_print(&pb, &format!("Voucher code found. Program selesai."));
 										process::exit(1);
 									} else {
-										print_and_log(&pb, &mut log_file, &format!("voucher_code yang ditemukan: {}{}{}", yellow, voucher_code, reset_color));
-										print_and_log(&pb, &mut log_file, &format!("collection_id: {}{}{}", green, collection_id, reset_color));
+										print_and_log(&pb, &mut log_file, &format!("voucher_code yang ditemukan: "), yellow, voucher_code, &format!("voucher_code yang ditemukan: "));
+										print_and_log(&pb, &mut log_file, &format!("collection_id: "), green, collection_id, &format!("collection_id: "));
 									}
 								}
 							}
 						}
 					}
 				}else{
-					print_and_log(&pb, &mut log_file, &format!("Bug API 2"));
-					print_and_log(&pb, &mut log_file, &format!("Tidak ada Info vouchers ditemukan untuk collection_id: {}", cid_1));
+					print_and_log(&pb, &mut log_file, &format!("Bug API 2"), "", "", &format!("Bug API 2"));
+					print_and_log(&pb, &mut log_file, &format!("Tidak ada Info vouchers ditemukan untuk collection_id: "), "", cid_1, &format!("collection_id: "));
 				}
 			}
 		}else {
-			print_and_log(&pb, &mut log_file, &format!("Tidak ada data ditemukan untuk collection_id: {}", cid_1));
+			print_and_log(&pb, &mut log_file, &format!("Tidak ada data ditemukan untuk collection_id: "), "", cid_1, &format!("collection_id: "));
 		}
 	}else {
 		interactive_print(&pb, &format!("POST request gagal untuk collection_id:: {}", cid_1));
@@ -420,7 +418,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = std::env::args().collect();
 	
 	println!("-------------------------------------------");
-	println!("get_vouchers_by_collections [Version 1.1.5]");
+	println!("get_vouchers_by_collections [Version 1.1.6]");
 	println!("");
 	println!("Dapatkan Info terbaru di https://google.com");
 	println!("");
