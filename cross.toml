@@ -1,6 +1,6 @@
 [package]
 name = "main"
-version = "1.1.4"
+version = "1.1.5"
 edition = "2021"
 description = "Get Voucher By Collections"
 build = "build.rs"
@@ -27,4 +27,5 @@ tokio = { version = "1", features = ["full"] }
 anyhow = "1.0"
 chrono = "0.4"
 indicatif = "0.17"
+atty = "0.2.14"
 openssl = { version = '0.10', features = ["vendored"] }
