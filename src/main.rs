@@ -184,14 +184,14 @@ async fn some_function(start: &str, end: &str, v_code: &str, cookie_content: &st
     let mut batch_number = 1;
     let mut current = start;
 	#[cfg(windows)]
-	let pb = if !(OsVersion::current() <= OsVersion::new(6, 3, 0, 9800)) {
-        let pb = ProgressBar::new(batch_count.try_into().unwrap());
+	let pb = if OsVersion::current() <= OsVersion::new(6, 3, 0, 9800) {
+        ProgressBar::hidden()
+    }else{
+		let pb = ProgressBar::new(batch_count.try_into().unwrap());
         pb.set_style(ProgressStyle::default_bar()
 			.template("[{elapsed_precise}] {bar:40.cyan/blue} {pos}/{len} {percent}% {msg}").expect("REASON")
 			.progress_chars("█░"));
         pb
-    }else{
-        ProgressBar::hidden()
     };
 
 	interactive_print(&pb, &format!("API Checker 1"));
