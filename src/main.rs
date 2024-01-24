@@ -1,14 +1,12 @@
 /*
 This Is a first version of get_vouchers_by_collections
 This version using api reqwest
+Whats new In 1.1.7 :
+fix for windows 7 console
 Whats new In 1.1.6 :
 fix included ansicode on logs
 Whats new In 1.1.5 :
 Add function interactive_print
-Whats new In 1.1.4 :
-Add progress bar
-Add function print_and_log only for color text
-remove ansiterm
 */
 
 use reqwest;
@@ -28,6 +26,8 @@ use std::io::prelude::*;
 use std::process;
 use indicatif::{ProgressBar, ProgressStyle};
 use chrono::{Local, Utc};
+#[cfg(windows)]
+use windows_version::*;
 
 #[derive(Serialize)]
 struct JsonRequest {
@@ -128,17 +128,22 @@ async fn manual_input() -> Result<()> {
 fn print_and_log(pb: &ProgressBar, mut log_file: &File, mes1: &str, color: &str, mes2: &str, logmes: &str) {
 	let reset_color = "\x1b[0m";
 	// Menampilkan output berwarna pada terminal
-	interactive_print(pb, &format!("{}{}{}{}", mes1, color, mes2, reset_color));
-
+	if OsVersion::current() <= OsVersion::new(6, 3, 0, 9800) {
+		interactive_print(pb, &format!("{}{}", mes1, mes2));
+	}else{
+		interactive_print(pb, &format!("{}{}{}{}", mes1, color, mes2, reset_color));
+	}
     // Menyimpan data ke dalam berkas log
     writeln!(log_file, "{}{}", logmes, mes2).expect("Gagal menulis ke file log");
 }
 
 fn interactive_print(pb: &ProgressBar, message: &str) {
 	let is_interactive = atty::is(atty::Stream::Stdout);
-	if is_interactive {
+	if cfg!(windows) && OsVersion::current() <= OsVersion::new(6, 2, 0, 9800){
+		println!("{}", format!("{}", message));
+	}else if is_interactive {
 		pb.println(format!("{}", message));
-	} else {
+	}else{
 		println!("{}", format!("{}", message));
 	}
 }
@@ -178,11 +183,16 @@ async fn some_function(start: &str, end: &str, v_code: &str, cookie_content: &st
     let mut batch_number = 1;
     let mut current = start;
 	
-	let pb = ProgressBar::new(batch_count.try_into().unwrap());
-	
-	// Atur gaya bar progres
-    pb.set_style(ProgressStyle::default_bar()
-        .template("[{elapsed_precise}] {bar:40.cyan/blue} {pos}/{len} {percent}% {msg}").expect("REASON"));
+	let pb = if !(OsVersion::current() <= OsVersion::new(6, 3, 0, 9800)) {
+        let pb = ProgressBar::new(batch_count.try_into().unwrap());
+        pb.set_style(ProgressStyle::default_bar()
+			.template("[{elapsed_precise}] {bar:40.cyan/blue} {pos}/{len} {percent}% {msg}").expect("REASON")
+			.progress_chars("█░"));
+        pb
+    }else{
+        ProgressBar::hidden()
+    };
+
 	interactive_print(&pb, &format!("API Checker 1"));
     for _ in 0..batch_count {
         interactive_print(&pb, &format!("[{}] Batch {} of {}", Local::now().format("%H:%M:%S.%3f"), batch_number, batch_count));
@@ -418,7 +428,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = std::env::args().collect();
 	
 	println!("-------------------------------------------");
-	println!("get_vouchers_by_collections [Version 1.1.6]");
+	println!("get_vouchers_by_collections [Version 1.1.7]");
 	println!("");
 	println!("Dapatkan Info terbaru di https://google.com");
 	println!("");
