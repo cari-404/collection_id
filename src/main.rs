@@ -127,9 +127,13 @@ async fn manual_input() -> Result<()> {
 
 fn print_and_log(pb: &ProgressBar, mut log_file: &File, mes1: &str, color: &str, mes2: &str, logmes: &str) {
 	let reset_color = "\x1b[0m";
-	#[cfg(windows)]
-	if OsVersion::current() <= OsVersion::new(6, 3, 0, 9800) {
-		interactive_print(pb, &format!("{}{}", mes1, mes2));
+	if cfg!(windows) {
+		#[cfg(windows)]
+		if OsVersion::current() <= OsVersion::new(6, 3, 0, 9800) {
+			interactive_print(pb, &format!("{}{}", mes1, mes2));
+		}else{
+			interactive_print(pb, &format!("{}{}{}{}", mes1, color, mes2, reset_color));
+		}
 	}else{
 		interactive_print(pb, &format!("{}{}{}{}", mes1, color, mes2, reset_color));
 	}
@@ -139,9 +143,13 @@ fn print_and_log(pb: &ProgressBar, mut log_file: &File, mes1: &str, color: &str,
 
 fn interactive_print(pb: &ProgressBar, message: &str) {
 	let is_interactive = atty::is(atty::Stream::Stdout);
-	#[cfg(windows)]
-	if cfg!(windows) && OsVersion::current() <= OsVersion::new(6, 2, 0, 9800){
-		println!("{}", format!("{}", message));
+	if cfg!(windows) {
+		#[cfg(windows)]
+		if OsVersion::current() <= OsVersion::new(6, 2, 0, 9800){
+			println!("{}", format!("{}", message));
+		}else{
+			pb.println(format!("{}", message));
+		}
 	}else if is_interactive {
 		pb.println(format!("{}", message));
 	}else{
