@@ -139,6 +139,7 @@ fn print_and_log(pb: &ProgressBar, mut log_file: &File, mes1: &str, color: &str,
 
 fn interactive_print(pb: &ProgressBar, message: &str) {
 	let is_interactive = atty::is(atty::Stream::Stdout);
+	#[cfg(windows)]
 	if cfg!(windows) && OsVersion::current() <= OsVersion::new(6, 2, 0, 9800){
 		println!("{}", format!("{}", message));
 	}else if is_interactive {
@@ -182,7 +183,7 @@ async fn some_function(start: &str, end: &str, v_code: &str, cookie_content: &st
     // Iterasi dan menuliskan angka dengan jarak 128
     let mut batch_number = 1;
     let mut current = start;
-	
+	#[cfg(windows)]
 	let pb = if !(OsVersion::current() <= OsVersion::new(6, 3, 0, 9800)) {
         let pb = ProgressBar::new(batch_count.try_into().unwrap());
         pb.set_style(ProgressStyle::default_bar()
