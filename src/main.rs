@@ -183,8 +183,8 @@ async fn some_function(start: &str, end: &str, v_code: &str, cookie_content: &st
     // Iterasi dan menuliskan angka dengan jarak 128
     let mut batch_number = 1;
     let mut current = start;
+	#[cfg(windows)]
     let pb = if cfg!(windows) {
-        // Kode khusus untuk lingkungan Windows
         if OsVersion::current() <= OsVersion::new(6, 3, 0, 9800) {
             ProgressBar::hidden()
         } else {
@@ -194,13 +194,18 @@ async fn some_function(start: &str, end: &str, v_code: &str, cookie_content: &st
                 .progress_chars("█░"));
             progress_bar
         }
-    } else {
-        // Kode untuk lingkungan selain Windows (Linux)
-        let progress_bar = ProgressBar::new(batch_count.try_into().unwrap());
-        progress_bar.set_style(ProgressStyle::default_bar()
+	} else {
+		let progress_bar = ProgressBar::new(batch_count.try_into().unwrap());
+		progress_bar.set_style(ProgressStyle::default_bar()
+			.template("[{elapsed_precise}] {bar:40.cyan/blue} {pos}/{len} {percent}% {msg}")?
+			.progress_chars("█░"));
+		progress_bar
+    };
+	#[cfg(not(windows))]{
+        let pb = ProgressBar::new(batch_count.try_into().unwrap());
+        pb.set_style(ProgressStyle::default_bar()
             .template("[{elapsed_precise}] {bar:40.cyan/blue} {pos}/{len} {percent}% {msg}")?
             .progress_chars("█░"));
-        progress_bar
     };
 
     for _ in 0..batch_count {
