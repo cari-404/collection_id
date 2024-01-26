@@ -66,7 +66,7 @@ jobs:
         mv cross.toml Cargo.toml
     - name: Build binary
       uses: houseabsolute/actions-rust-cross@v0
-      if: matrix.platform.os_name != 'Android-aarch64'
+      if: matrix.platform.os_name != 'Android-aarch64' && matrix.platform.os_name != 'Windows-i586'
       with:
         command: "build"
         target: ${{ matrix.platform.target }}
@@ -74,7 +74,7 @@ jobs:
         args: "--release"
         strip: true
     - name: Build binary
-      if: matrix.platform.os_name == 'Android-aarch64'
+      if: matrix.platform.os_name == 'Android-aarch64' && matrix.platform.os_name != 'Windows-i586'
       uses: actions-rs/toolchain@v1
       with:
           toolchain: stable
@@ -88,6 +88,13 @@ jobs:
         cargo install cargo-ndk
         rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android i686-linux-android
         cargo ndk -t armeabi-v7a -t arm64-v8a build --release
+
+    - name: install
+      if: matrix.platform.os_name == 'Windows-i586'
+      run: |
+        rustup target add i586-pc-windows-msvc
+        cargo add windows
+        cargo build --release --target i586-pc-windows-msvc
 
     - name: Run tests
       run: ls -R
