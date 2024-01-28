@@ -1,6 +1,8 @@
 /*
 This Is a first version of get_vouchers_by_collections
 This version using api reqwest
+Whats new In 1.1.72 :
+simplyfy code for progress bar process
 Whats new In 1.1.7 :
 fix for windows 7 console
 Whats new In 1.1.6 :
