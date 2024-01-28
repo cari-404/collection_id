@@ -192,7 +192,7 @@ async fn some_function(start: &str, end: &str, v_code: &str, cookie_content: &st
     let mut batch_number = 1;
     let mut current = start;
 
-	let pb: ProgressBar;
+	let mut pb: ProgressBar = ProgressBar::hidden();
 	if cfg!(windows) {
 		#[cfg(windows)]
 		if OsVersion::current() <= OsVersion::new(6, 3, 0, 9800) {
@@ -210,7 +210,7 @@ async fn some_function(start: &str, end: &str, v_code: &str, cookie_content: &st
 			.template("[{elapsed_precise}] {bar:40.cyan/blue} {pos}/{len} {percent}% {msg}")?
 			.progress_chars("█░"));
 		pb = progress_bar;
-	};
+	}
 
     for _ in 0..batch_count {
         interactive_print(&pb, &format!("[{}] Batch {} of {}", Local::now().format("%H:%M:%S.%3f"), batch_number, batch_count));
