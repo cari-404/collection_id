@@ -192,7 +192,7 @@ async fn some_function(start: &str, end: &str, v_code: &str, cookie_content: &st
     let mut batch_number = 1;
     let mut current = start;
 
-	let pb = if cfg!(windows) {
+	let pb: ProgressBar = if cfg!(windows) {
 		#[cfg(windows)]
 		if OsVersion::current() <= OsVersion::new(6, 3, 0, 9800) {
 			let progress_bar = ProgressBar::hidden();
