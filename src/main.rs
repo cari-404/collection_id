@@ -1,14 +1,12 @@
 /*
 This Is a first version of get_vouchers_by_collections
 This version using api reqwest
+Whats new In 1.1.725 :
+test precision 
 Whats new In 1.1.72 :
 simplyfy code for progress bar process
 Whats new In 1.1.7 :
 fix for windows 7 console
-Whats new In 1.1.6 :
-fix included ansicode on logs
-Whats new In 1.1.5 :
-Add function interactive_print
 */
 
 use reqwest;
@@ -181,20 +179,20 @@ async fn some_function(start: &str, end: &str, v_code: &str, cookie_content: &st
     File::open(&header_folder)?.read_to_string(&mut sz_token_content)?;
 	println!("sz-token:{}", sz_token_content);
 	
-	let start: i64 = start.trim().parse().expect("Input tidak valid");
+	let mulai = fix_start (&start);
 	let end: i64 = end.trim().parse().expect("Input tidak valid");
 
     // Jumlah nilai per batch
     let values_per_batch = 5;
 
     // Hitung jumlah batch
-    let batch_count = ((end - start) / 128 / values_per_batch) + 1;
+    let batch_count = ((end - mulai) / 128 / values_per_batch) + 1;
 
     // Iterasi dan menuliskan angka dengan jarak 128
     let mut batch_number = 1;
-    let mut current = start;
-
-	let mut pb: ProgressBar = ProgressBar::hidden();
+    let mut current = mulai;
+	
+	let pb;
 	if cfg!(windows) {
 		#[cfg(windows)]
 		if OsVersion::current() <= OsVersion::new(6, 3, 0, 9800) {
@@ -281,7 +279,7 @@ async fn some_function(start: &str, end: &str, v_code: &str, cookie_content: &st
 			// Check for HTTP status code indicating an error
 			//let http_version = response.version(); 		// disable output features
 			//println!("HTTP Version: {:?}", http_version); // disable output features
-			let log_filename = format!("{}-{}_{}.log", start , end , formatted_datetime);
+			let log_filename = format!("{}-{}_{}.log", mulai, end, formatted_datetime);
 			// Pembukaan file dilakukan di luar loop
 			let mut log_file = OpenOptions::new()
 				.create(true)
@@ -522,4 +520,20 @@ fn choose_and_save_cookie() -> Result<(), Box<dyn std::error::Error>> {
     write!(akun_conf_file, "{}", selected_file)?;
 
     Ok(())
+}
+
+fn fix_start (start: &str) -> i64 {
+	let start: i64 = start.trim().parse().expect("Input tidak valid");
+	println!("Check Start");
+	let x = (start - 8) as f64 / 128.0;
+    if x.fract() == 0.0 {
+        println!("Benar");
+		start
+    } else {
+        println!("Hitung pendekatannya");
+		let rounded_up = x.ceil() as i64;
+		println!("Pembulatan ke atas: {}", rounded_up);
+		let mulai = (rounded_up * 128) - 120;
+		mulai
+    }
 }
