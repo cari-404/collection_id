@@ -209,7 +209,6 @@ async fn some_function(start: &str, end: &str, v_code: &str, cookie_content: &st
 		progress_bar.set_style(ProgressStyle::default_bar()
 			.template("[{elapsed_precise}] {bar:40.cyan/blue} {pos}/{len} {percent}% {msg}")?
 			.progress_chars("█░"));
-		progress_bar
 	};
 
     for _ in 0..batch_count {
