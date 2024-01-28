@@ -474,6 +474,54 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+fn choose_and_save_cookie() -> Result<(), Box<dyn std::error::Error>> {
+    // Menampilkan daftar file cookie yang tersedia
+    println!("Daftar file cookie yang tersedia:");
+    let files = std::fs::read_dir("./akun")?;
+    let mut file_options = Vec::new();
+    for (index, file) in files.enumerate() {
+        if let Ok(file) = file {
+            let file_name = file.file_name();
+            println!("{}. {}", index + 1, file_name.to_string_lossy());
+            file_options.push(file_name.to_string_lossy().to_string());
+        }
+    }
+    // Pilih nomor file cookie yang ingin digunakan
+    let selected_file = loop {
+        println!("Pilih nomor file cookie yang ingin digunakan:");
+        let mut input = String::new();
+        io::stdin().read_line(&mut input).expect("Gagal membaca baris");
+
+        // Konversi input ke nomor indeks
+        if let Ok(index) = input.trim().parse::<usize>() {
+            if index > 0 && index <= file_options.len() {
+                break file_options[index - 1].clone();
+            }
+        }
+    };
+    // Simpan nama file cookie yang dipilih ke dalam akun.conf
+    let mut akun_conf_file = File::create("akun.conf")?;
+    write!(akun_conf_file, "{}", selected_file)?;
+
+    Ok(())
+}
+
+fn fix_start (start: &str) -> i64 {
+	let start: i64 = start.trim().parse().expect("Input tidak valid");
+	println!("Check Start");
+	let x = (start - 8) as f64 / 128.0;
+    if x.fract() == 0.0 {
+        println!("Benar");
+		start
+    } else {
+        println!("Hitung pendekatannya");
+		let rounded_up = x.ceil() as i64;
+		println!("Pembulatan ke atas: {}", rounded_up);
+		let mulai = (rounded_up * 128) - 120;
+		mulai
+    }
+}
+
 #[cfg(windows)]
 fn bar(batch_count: &i64) -> ProgressBar {
     if OsVersion::current() <= OsVersion::new(6, 3, 0, 9800) {
