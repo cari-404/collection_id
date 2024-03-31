@@ -1,14 +1,12 @@
 /*
 This Is a first version of get_vouchers_by_collections
 This version using api reqwest
+Whats new In 1.1.8 :
+Add csrftoken function
 Whats new In 1.1.726 :
 seperate config for safety warning and error
 Whats new In 1.1.725 :
 test precision 
-Whats new In 1.1.72 :
-simplyfy code for progress bar process
-Whats new In 1.1.7 :
-fix for windows 7 console
 */
 
 use reqwest;
@@ -45,6 +43,17 @@ struct VoucherCollectionRequest {
     microsite_id: i64,
     offset: i64,
     number_of_vouchers_per_row: i64,
+}
+
+fn extract_csrftoken(cookie_string: &str) -> String {
+    let mut csrftoken = String::new();
+    if let Some(token_index) = cookie_string.find("csrftoken=") {
+        let token_start = token_index + "csrftoken=".len();
+        if let Some(token_end) = cookie_string[token_start..].find(';') {
+            csrftoken = cookie_string[token_start..token_start + token_end].to_string();
+        }
+    }
+    csrftoken
 }
 
 async fn process_arguments(start: &str, end: &str, v_code: &str) -> Result<()> {
@@ -180,6 +189,12 @@ async fn some_function(start: &str, end: &str, v_code: &str, cookie_content: &st
     let mut sz_token_content = String::new();
     File::open(&header_folder)?.read_to_string(&mut sz_token_content)?;
 	println!("sz-token:{}", sz_token_content);
+    let cookie_content_owned = cookie_content.to_string();
+
+    // Pass the cloned String to extract_csrftoken
+    let csrftoken = extract_csrftoken(&cookie_content_owned);
+    println!("csrftoken: {}", csrftoken);
+	let csrftoken_string = csrftoken.to_string();
 	
 	let mulai = fix_start (&start);
 	let end: i64 = end.trim().parse().expect("Input tidak valid");
@@ -220,7 +235,7 @@ async fn some_function(start: &str, end: &str, v_code: &str, cookie_content: &st
 			headers.insert("x-sap-access-t", reqwest::header::HeaderValue::from_static("1694342213"));
 			headers.insert("af-ac-enc-dat", reqwest::header::HeaderValue::from_static(""));
 			headers.insert("x-sap-access-s", reqwest::header::HeaderValue::from_static("LwGv74_7pqcgSlOERyAuF3XJ4Xw9IZ6gWvo_ZdVuFJA="));
-			headers.insert("x-csrftoken", reqwest::header::HeaderValue::from_static("6du999g4UlXCglP4gjLi1wp6RzWoa4BW"));
+			headers.insert("x-csrftoken", reqwest::header::HeaderValue::from_str(&csrftoken_string)?);
 			headers.insert("sec-ch-ua-platform", reqwest::header::HeaderValue::from_static("\"Windows\""));
 			headers.insert("x-sap-sec", reqwest::header::HeaderValue::from_static(""));
 			headers.insert("sec-ch-ua-mobile", reqwest::header::HeaderValue::from_static("?0"));
@@ -430,7 +445,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = std::env::args().collect();
 	
 	println!("-------------------------------------------");
-	println!("get_vouchers_by_collections [Version 1.1.7]");
+	println!("get_vouchers_by_collections [Version 1.1.8]");
 	println!("");
 	println!("Dapatkan Info terbaru di https://google.com");
 	println!("");
