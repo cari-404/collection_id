@@ -1,12 +1,14 @@
 /*
 This Is a first version of get_vouchers_by_collections
 This version using api reqwest
+Whats new In 1.1.9 :
+restructure new header
+new url
 Whats new In 1.1.8 :
 Add csrftoken function
-Whats new In 1.1.726 :
-seperate config for safety warning and error
-Whats new In 1.1.725 :
-test precision 
+restructure header
+Whats new In 1.1.7 :
+fix for windows 7 console
 */
 
 use reqwest;
@@ -148,7 +150,6 @@ fn print_and_log(pb: &ProgressBar, mut log_file: &File, mes1: &str, color: &str,
 	}else{
 		interactive_print(pb, &format!("{}{}{}{}", mes1, color, mes2, reset_color));
 	}
-    // Menyimpan data ke dalam berkas log
     writeln!(log_file, "{}{}", logmes, mes2).expect("Gagal menulis ke file log");
 }
 
@@ -195,7 +196,6 @@ async fn some_function(start: &str, end: &str, v_code: &str, cookie_content: &st
     let csrftoken = extract_csrftoken(&cookie_content_owned);
     println!("csrftoken: {}", csrftoken);
 	let csrftoken_string = csrftoken.to_string();
-	
 	let mulai = fix_start (&start);
 	let end: i64 = end.trim().parse().expect("Input tidak valid");
 
@@ -219,38 +219,28 @@ async fn some_function(start: &str, end: &str, v_code: &str, cookie_content: &st
             let voucher_request = VoucherCollectionRequest {
                 collection_id: current.to_string(),
                 component_type: 2,
-                component_id: 1694165901230,
+                component_id: 1712077200,
                 limit: 100,
-                microsite_id: 58982,
+                microsite_id: 63749,
                 offset: 0,
-                number_of_vouchers_per_row: 1,
+                number_of_vouchers_per_row: 2,
             };
 			
 			let mut headers = reqwest::header::HeaderMap::new();
-			headers.insert("sec-ch-ua", reqwest::header::HeaderValue::from_static("\"Chromium\";v=\"119\", \"Not)A;Brand\";v=\"24\", \"Google Chrome\";v=\"119\""));
-			headers.insert("x-sap-access-f", reqwest::header::HeaderValue::from_static("3.2.119.2.0|13|3.3.0-2_5.1.0_0_343|3f8e71489e604fe39d386d8a6810764f4b299d79ad9a4d|10900|1100"));
-			headers.insert("x-sz-sdk-version", reqwest::header::HeaderValue::from_static("3.3.0-2&1.6.8"));
-			headers.insert("x-shopee-language", reqwest::header::HeaderValue::from_static("id"));
-			headers.insert("x-requested-with", reqwest::header::HeaderValue::from_static("XMLHttpRequest"));
-			headers.insert("x-sap-access-t", reqwest::header::HeaderValue::from_static("1694342213"));
-			headers.insert("af-ac-enc-dat", reqwest::header::HeaderValue::from_static(""));
-			headers.insert("x-sap-access-s", reqwest::header::HeaderValue::from_static("LwGv74_7pqcgSlOERyAuF3XJ4Xw9IZ6gWvo_ZdVuFJA="));
-			headers.insert("x-csrftoken", reqwest::header::HeaderValue::from_str(&csrftoken_string)?);
-			headers.insert("sec-ch-ua-platform", reqwest::header::HeaderValue::from_static("\"Windows\""));
-			headers.insert("x-sap-sec", reqwest::header::HeaderValue::from_static(""));
-			headers.insert("sec-ch-ua-mobile", reqwest::header::HeaderValue::from_static("?0"));
-			headers.insert("user-agent", reqwest::header::HeaderValue::from_static("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"));
-			headers.insert("x-api-source", reqwest::header::HeaderValue::from_static("pc"));
-			headers.insert("content-type", reqwest::header::HeaderValue::from_static("application/json"));
+			headers.insert("User-Agent", reqwest::header::HeaderValue::from_static("Android app Shopee appver=32250 app_type=1"));
 			headers.insert("accept", reqwest::header::HeaderValue::from_static("application/json"));
-			headers.insert("af-ac-enc-sz-token", reqwest::header::HeaderValue::from_str(&sz_token_content.trim())?);
-			headers.insert("origin", reqwest::header::HeaderValue::from_static("https://shopee.co.id"));
-			headers.insert("sec-fetch-site", reqwest::header::HeaderValue::from_static("same-origin"));
-			headers.insert("sec-fetch-mode", reqwest::header::HeaderValue::from_static("cors"));
-			headers.insert("sec-fetch-dest", reqwest::header::HeaderValue::from_static("empty"));
-			headers.insert("referer", reqwest::header::HeaderValue::from_static("https://shopee.co.id/m/9-9"));
-			headers.insert("accept-encoding", reqwest::header::HeaderValue::from_static("gzip, deflate"));
-			headers.insert("accept-language", reqwest::header::HeaderValue::from_static("en-US,en;q=0.9,id;q=0.8"));
+			headers.insert("Content-Type", reqwest::header::HeaderValue::from_static("application/json"));
+			headers.insert("x-api-source", reqwest::header::HeaderValue::from_static("rn"));
+			headers.insert("if-none-match-", reqwest::header::HeaderValue::from_static("55b03-8f1a78d495601e3a183dd4c1efb8ac00"));
+			headers.insert("shopee_http_dns_mode", reqwest::header::HeaderValue::from_static("1"));
+			headers.insert("x-shopee-client-timezone", reqwest::header::HeaderValue::from_static("Asia/Jakarta"));
+			headers.insert("af-ac-enc-dat", reqwest::header::HeaderValue::from_static(""));
+			headers.insert("af-ac-enc-id", reqwest::header::HeaderValue::from_static(""));
+			headers.insert("x-sap-access-t", reqwest::header::HeaderValue::from_static(""));
+			headers.insert("x-sap-access-f", reqwest::header::HeaderValue::from_static(""));
+			headers.insert("referer", reqwest::header::HeaderValue::from_static("https://mall.shopee.co.id/"));
+			headers.insert("x-csrftoken", reqwest::header::HeaderValue::from_str(&csrftoken_string)?);
+			headers.insert("af-ac-enc-sz-token", reqwest::header::HeaderValue::from_static(""));
 			headers.insert(reqwest::header::COOKIE, reqwest::header::HeaderValue::from_str(&cookie_content)?);
 
             // Bentuk struct JsonRequest
@@ -260,81 +250,96 @@ async fn some_function(start: &str, end: &str, v_code: &str, cookie_content: &st
 
             // Convert struct to JSON
             let json_body = serde_json::to_string(&json_request)?;
+			
+			loop {
+				let client = ClientBuilder::new()
+					.gzip(true)
+					.use_rustls_tls() // Use Rustls for HTTPS
+					.build()?;
 
-			let client = ClientBuilder::new()
-				.gzip(true)
-				.use_rustls_tls() // Use Rustls for HTTPS
-				.build()?;
-
-            // Buat permintaan HTTP POST
-            let response = client
-                .post("https://shopee.co.id/api/v1/microsite/get_vouchers_by_collections")
-                .header("Content-Type", "application/json")
-                .headers(headers.clone())
-                .body(json_body)
-				.version(Version::HTTP_2) 
-                .send()
-                .await?;
-			// Check for HTTP status code indicating an error
-			//let http_version = response.version(); 		// disable output features
-			//println!("HTTP Version: {:?}", http_version); // disable output features
-			let log_filename = format!("{}-{}_{}.log", mulai, end, formatted_datetime);
-			// Pembukaan file dilakukan di luar loop
-			let mut log_file = OpenOptions::new()
-				.create(true)
-				.append(true)
-				.open(&log_filename)
-				.expect("Gagal membuka file log");
-			let status = response.status();
-			let text = response.text().await?;	
-			if status == reqwest::StatusCode::OK {
-				let hasil: Value = serde_json::from_str(&text)?;
-				// Access specific values using serde_json::Value methods
-				if let Some(data_array) = hasil.get("data").and_then(|data| data.as_array()) {
-					for data_value in data_array {
-						if let Some(vouchers_array) = data_value.get("vouchers").and_then(|vouchers| vouchers.as_array()) {
-							for voucher_value in vouchers_array {
-								if let Some(voucher_obj) = voucher_value.get("voucher").and_then(|voucher| voucher.as_object()) {
-									if let Some(voucher_identifier_obj) = voucher_obj.get("voucher_identifier").and_then(|vi| vi.as_object()) {
-										if let Some(v_code_api) = voucher_identifier_obj.get("voucher_code").and_then(|vc| vc.as_str()) {
-											// Use a different variable name to avoid shadowing the outer v_code
-											let voucher_code_value = v_code_api.to_string();
-											let promotion_id = voucher_identifier_obj.get("promotion_id").and_then(|pi| pi.as_i64()).unwrap_or(0);
-											let voucher_code = voucher_identifier_obj.get("voucher_code").and_then(|vc| vc.as_str()).unwrap_or("");
-											let signature = voucher_identifier_obj.get("signature").and_then(|s| s.as_str()).unwrap_or("");
-											let collection_id = data_value.get("collection_id").and_then(|ci| ci.as_str()).unwrap_or("");
-											// Check if v_code matches the found voucher_code
-											if v_code.trim() == voucher_code_value {
-												let promotion_id_str = promotion_id.to_string();
-												// Set the flag to true when a voucher code is found
-												print_and_log(&pb, &mut log_file, &format!("Voucher ditemukan:"), "", "", &format!("Voucher ditemukan:"));
-												print_and_log(&pb, &mut log_file, &format!("promotion_id: "), green, &promotion_id_str, &format!("promotion_id: "));
-												print_and_log(&pb, &mut log_file, &format!("voucher_code: "), green, voucher_code, &format!("voucher_code: "));
-												print_and_log(&pb, &mut log_file, &format!("signature: "), green, signature, &format!("signature: "));
-												print_and_log(&pb, &mut log_file, &format!("collection_id: "), green, collection_id, &format!("collection_id: "));
-												// Exit the program if a matching voucher code is found
-												interactive_print(&pb, &format!("Voucher code found. Program selesai."));
-												return Ok(());
-											} else {
-												print_and_log(&pb, &mut log_file, &format!("voucher_code yang ditemukan: "), yellow, voucher_code, &format!("voucher_code yang ditemukan: "));
-												print_and_log(&pb, &mut log_file, &format!("collection_id: "), green, collection_id, &format!("collection_id: "));
+				// Buat permintaan HTTP POST
+				let response = client
+					.post("https://mall.shopee.co.id/api/v1/microsite/get_vouchers_by_collections")
+					.header("Content-Type", "application/json")
+					.headers(headers.clone())
+					.body(json_body.clone())
+					.version(Version::HTTP_2) 
+					.send()
+					.await?;
+				// Check for HTTP status code indicating an error
+				//let http_version = response.version(); 		// disable output features
+				//println!("HTTP Version: {:?}", http_version); // disable output features
+				let log_filename = format!("{}-{}_{}.log", mulai, end, formatted_datetime);
+				// Pembukaan file dilakukan di luar loop
+				let mut log_file = OpenOptions::new()
+					.create(true)
+					.append(true)
+					.open(&log_filename)
+					.expect("Gagal membuka file log");
+				let status = response.status();
+				let text = response.text().await?;	
+				if status == reqwest::StatusCode::OK {
+					let hasil: Value = serde_json::from_str(&text)?;
+					let error_res = hasil.get("error").and_then(|er| er.as_i64()).unwrap_or(0);
+					let error_res_str = error_res.to_string();
+					// Access specific values using serde_json::Value methods
+					if let Some(data_array) = hasil.get("data").and_then(|data| data.as_array()) {
+						for data_value in data_array {
+							if let Some(vouchers_array) = data_value.get("vouchers").and_then(|vouchers| vouchers.as_array()) {
+								for voucher_value in vouchers_array {
+									if let Some(voucher_obj) = voucher_value.get("voucher").and_then(|voucher| voucher.as_object()) {
+										if let Some(voucher_identifier_obj) = voucher_obj.get("voucher_identifier").and_then(|vi| vi.as_object()) {
+											if let Some(v_code_api) = voucher_identifier_obj.get("voucher_code").and_then(|vc| vc.as_str()) {
+												// Use a different variable name to avoid shadowing the outer v_code
+												let voucher_code_value = v_code_api.to_string();
+												let promotion_id = voucher_identifier_obj.get("promotion_id").and_then(|pi| pi.as_i64()).unwrap_or(0);
+												let voucher_code = voucher_identifier_obj.get("voucher_code").and_then(|vc| vc.as_str()).unwrap_or("");
+												let signature = voucher_identifier_obj.get("signature").and_then(|s| s.as_str()).unwrap_or("");
+												let collection_id = data_value.get("collection_id").and_then(|ci| ci.as_str()).unwrap_or("");
+												// Check if v_code matches the found voucher_code
+												if v_code.trim() == voucher_code_value {
+													let promotion_id_str = promotion_id.to_string();
+													// Set the flag to true when a voucher code is found
+													print_and_log(&pb, &mut log_file, &format!("Voucher ditemukan:"), "", "", &format!("Voucher ditemukan:"));
+													print_and_log(&pb, &mut log_file, &format!("promotion_id: "), green, &promotion_id_str, &format!("promotion_id: "));
+													print_and_log(&pb, &mut log_file, &format!("voucher_code: "), green, voucher_code, &format!("voucher_code: "));
+													print_and_log(&pb, &mut log_file, &format!("signature: "), green, signature, &format!("signature: "));
+													print_and_log(&pb, &mut log_file, &format!("collection_id: "), green, collection_id, &format!("collection_id: "));
+													// Exit the program if a matching voucher code is found
+													interactive_print(&pb, &format!("Voucher code found. Program selesai."));
+													return Ok(());
+												} else {
+													print_and_log(&pb, &mut log_file, &format!("voucher_code yang ditemukan: "), yellow, voucher_code, &format!("voucher_code yang ditemukan: "));
+													print_and_log(&pb, &mut log_file, &format!("collection_id: "), green, collection_id, &format!("collection_id: "));
+												}
 											}
 										}
 									}
 								}
+							}else{
+								print_and_log(&pb, &mut log_file, &format!("API Checker 1"), "", "", &format!("API Checker 1"));
+								let cid_1 = current.to_string();
+								api_1(&pb, &cid_1, &headers.clone(), v_code, &log_file).await?;
 							}
-						}else{
-							print_and_log(&pb, &mut log_file, &format!("API Checker 1"), "", "", &format!("API Checker 1"));
-							let cid_1 = current.to_string();
-							api_1(&pb, &cid_1, &headers.clone(), v_code, &log_file).await?;
 						}
+					/*} else if !error_res_str.is_empty() {
+						interactive_print(&pb, &format!("error: {}", error_res_str));*/
+					}else {
+						print_and_log(&pb, &mut log_file, &format!("Tidak ada data ditemukan untuk collection_id: "), "", &current.to_string(), &format!("collection_id: "));
+						print_and_log(&pb, &mut log_file, &format!("error : "), "", &error_res_str, &format!("error : "));
+						print_and_log(&pb, &mut log_file, &format!("Body  : "), "", &text, &format!("Body  : "));
 					}
+					break;
+				}else if status == reqwest::StatusCode::IM_A_TEAPOT {
+					interactive_print(&pb, &format!("POST request gagal untuk collection_id:: {}", current.to_string()));
+					interactive_print(&pb, &format!("Gagal, status code: 418 - I'm a teapot. Mencoba kembali..."));
+					interactive_print(&pb, &format!("{}", text));
+					continue;
 				}else {
-					print_and_log(&pb, &mut log_file, &format!("Tidak ada data ditemukan untuk collection_id: "), "", &current.to_string(), &format!("collection_id: "));
+					interactive_print(&pb, &format!("POST request gagal untuk collection_id:: {}", current.to_string()));
+					interactive_print(&pb, &format!("Status: {}", status));
+					break;
 				}
-			}else {
-				interactive_print(&pb, &format!("POST request gagal untuk collection_id:: {}", current.to_string()));
-				interactive_print(&pb, &format!("Status: {}", status));
 			}
             // Tingkatkan nilai current untuk batch berikutnya
             current += 128;
@@ -354,9 +359,9 @@ async fn api_1(pb: &ProgressBar, cid_1: &str, headers: &HeaderMap, v_code: &str,
 	let voucher_request = VoucherCollectionRequest {
 		collection_id: cid_1.to_string(),
 		component_type: 1,
-		component_id: 1694165901230,
+		component_id: 1712077200,
 		limit: 100,
-		microsite_id: 58982,
+		microsite_id: 62902,
 		offset: 0,
 		number_of_vouchers_per_row: 1,
 	};
@@ -367,74 +372,89 @@ async fn api_1(pb: &ProgressBar, cid_1: &str, headers: &HeaderMap, v_code: &str,
 
 	// Convert struct to JSON
 	let json_body = serde_json::to_string(&json_request)?;
+	
+	loop {
+		let client = ClientBuilder::new()
+			.gzip(true)
+			.use_rustls_tls() // Use Rustls for HTTPS
+			.build()?;
 
-	let client = ClientBuilder::new()
-		.gzip(true)
-		.use_rustls_tls() // Use Rustls for HTTPS
-		.build()?;
+		// Buat permintaan HTTP POST
+		let response = client
+			.post("https://mall.shopee.co.id/api/v1/microsite/get_vouchers_by_collections")
+			.header("Content-Type", "application/json")
+			.headers(cloned_headers.clone())
+			.body(json_body.clone())
+			.version(Version::HTTP_2) 
+			.send()
+			.await?;
+		// Check for HTTP status code indicating an error
+		//let http_version = response.version(); 		// disable output features
+		//println!("HTTP Version: {:?}", http_version); // disable output features
+		let status = response.status();
+		let text = response.text().await?;	
+		if status == reqwest::StatusCode::OK {
+			let hasil: Value = serde_json::from_str(&text)?;
+			let error_res = hasil.get("error").and_then(|er| er.as_i64()).unwrap_or(0);
+			let error_res_str = error_res.to_string();
+			// Access specific values using serde_json::Value methods
+			if let Some(data_array) = hasil.get("data").and_then(|data| data.as_array()) {
+				for data_value in data_array {
+					if let Some(vouchers_array) = data_value.get("vouchers").and_then(|vouchers| vouchers.as_array()) {
+						for voucher_value in vouchers_array {
+							if let Some(voucher_obj) = voucher_value.get("voucher").and_then(|voucher| voucher.as_object()) {
+								if let Some(voucher_identifier_obj) = voucher_obj.get("voucher_identifier").and_then(|vi| vi.as_object()) {
+									if let Some(v_code_api) = voucher_identifier_obj.get("voucher_code").and_then(|vc| vc.as_str()) {
+										// Use a different variable name to avoid shadowing the outer v_code
+										let voucher_code_value = v_code_api.to_string();
+										let promotion_id = voucher_identifier_obj.get("promotion_id").and_then(|pi| pi.as_i64()).unwrap_or(0);
+										let voucher_code = voucher_identifier_obj.get("voucher_code").and_then(|vc| vc.as_str()).unwrap_or("");
+										let signature = voucher_identifier_obj.get("signature").and_then(|s| s.as_str()).unwrap_or("");
+										let collection_id = data_value.get("collection_id").and_then(|ci| ci.as_str()).unwrap_or("");
+										// Check if v_code matches the found voucher_code
+										if v_code.trim() == voucher_code_value {
+											let promotion_id_str = promotion_id.to_string();
+											// Set the flag to true when a voucher code is found
+											print_and_log(&pb, &mut log_file, &format!("Voucher ditemukan:"), "", "", &format!("Voucher ditemukan:"));
+											print_and_log(&pb, &mut log_file, &format!("promotion_id: "), green, &promotion_id_str, &format!("promotion_id: "));
+											print_and_log(&pb, &mut log_file, &format!("voucher_code: "), green, voucher_code, &format!("voucher_code: "));
+											print_and_log(&pb, &mut log_file, &format!("signature: "), green, signature, &format!("signature: "));
+											print_and_log(&pb, &mut log_file, &format!("collection_id: "), green, collection_id, &format!("collection_id: "));
 
-	// Buat permintaan HTTP POST
-	let response = client
-		.post("https://shopee.co.id/api/v1/microsite/get_vouchers_by_collections")
-		.header("Content-Type", "application/json")
-		.headers(cloned_headers)
-		.body(json_body)
-		.version(Version::HTTP_2) 
-		.send()
-		.await?;
-	// Check for HTTP status code indicating an error
-	//let http_version = response.version(); 		// disable output features
-	//println!("HTTP Version: {:?}", http_version); // disable output features
-	let status = response.status();
-	let text = response.text().await?;	
-	if status == reqwest::StatusCode::OK {
-		let hasil: Value = serde_json::from_str(&text)?;
-		// Access specific values using serde_json::Value methods
-		if let Some(data_array) = hasil.get("data").and_then(|data| data.as_array()) {
-			for data_value in data_array {
-				if let Some(vouchers_array) = data_value.get("vouchers").and_then(|vouchers| vouchers.as_array()) {
-					for voucher_value in vouchers_array {
-						if let Some(voucher_obj) = voucher_value.get("voucher").and_then(|voucher| voucher.as_object()) {
-							if let Some(voucher_identifier_obj) = voucher_obj.get("voucher_identifier").and_then(|vi| vi.as_object()) {
-								if let Some(v_code_api) = voucher_identifier_obj.get("voucher_code").and_then(|vc| vc.as_str()) {
-									// Use a different variable name to avoid shadowing the outer v_code
-									let voucher_code_value = v_code_api.to_string();
-									let promotion_id = voucher_identifier_obj.get("promotion_id").and_then(|pi| pi.as_i64()).unwrap_or(0);
-									let voucher_code = voucher_identifier_obj.get("voucher_code").and_then(|vc| vc.as_str()).unwrap_or("");
-									let signature = voucher_identifier_obj.get("signature").and_then(|s| s.as_str()).unwrap_or("");
-									let collection_id = data_value.get("collection_id").and_then(|ci| ci.as_str()).unwrap_or("");
-									// Check if v_code matches the found voucher_code
-									if v_code.trim() == voucher_code_value {
-										let promotion_id_str = promotion_id.to_string();
-										// Set the flag to true when a voucher code is found
-										print_and_log(&pb, &mut log_file, &format!("Voucher ditemukan:"), "", "", &format!("Voucher ditemukan:"));
-										print_and_log(&pb, &mut log_file, &format!("promotion_id: "), green, &promotion_id_str, &format!("promotion_id: "));
-										print_and_log(&pb, &mut log_file, &format!("voucher_code: "), green, voucher_code, &format!("voucher_code: "));
-										print_and_log(&pb, &mut log_file, &format!("signature: "), green, signature, &format!("signature: "));
-										print_and_log(&pb, &mut log_file, &format!("collection_id: "), green, collection_id, &format!("collection_id: "));
-
-										// Exit the program if a matching voucher code is found
-										interactive_print(&pb, &format!("Voucher code found. Program selesai."));
-										process::exit(1);
-									} else {
-										print_and_log(&pb, &mut log_file, &format!("voucher_code yang ditemukan: "), yellow, voucher_code, &format!("voucher_code yang ditemukan: "));
-										print_and_log(&pb, &mut log_file, &format!("collection_id: "), green, collection_id, &format!("collection_id: "));
+											// Exit the program if a matching voucher code is found
+											interactive_print(&pb, &format!("Voucher code found. Program selesai."));
+											process::exit(1);
+										}else {
+											print_and_log(&pb, &mut log_file, &format!("voucher_code yang ditemukan: "), yellow, voucher_code, &format!("voucher_code yang ditemukan: "));
+											print_and_log(&pb, &mut log_file, &format!("collection_id: "), green, collection_id, &format!("collection_id: "));
+										}
 									}
 								}
 							}
 						}
+					}else{
+						print_and_log(&pb, &mut log_file, &format!("Bug API 2"), "", "", &format!("Bug API 2"));
+						print_and_log(&pb, &mut log_file, &format!("Tidak ada Info vouchers ditemukan untuk collection_id: "), "", cid_1, &format!("collection_id: "));
 					}
-				}else{
-					print_and_log(&pb, &mut log_file, &format!("Bug API 2"), "", "", &format!("Bug API 2"));
-					print_and_log(&pb, &mut log_file, &format!("Tidak ada Info vouchers ditemukan untuk collection_id: "), "", cid_1, &format!("collection_id: "));
 				}
+			/*} else if !error_res_str.is_empty() {
+				interactive_print(&pb, &format!("error: {}", error_res_str));*/
+			}else {
+				print_and_log(&pb, &mut log_file, &format!("Tidak ada data ditemukan untuk collection_id: "), "", cid_1, &format!("collection_id: "));
+				print_and_log(&pb, &mut log_file, &format!("error : "), "", &error_res_str, &format!("error : "));
+				print_and_log(&pb, &mut log_file, &format!("Body  : "), "", &text, &format!("Body  : "));
 			}
+			break;
+		}else if status == reqwest::StatusCode::IM_A_TEAPOT {
+			interactive_print(&pb, &format!("POST request gagal untuk collection_id:: {}", cid_1));
+			interactive_print(&pb, &format!("Gagal, status code: 418 - I'm a teapot. Mencoba kembali..."));
+			interactive_print(&pb, &format!("{}", text));
+			continue;
 		}else {
-			print_and_log(&pb, &mut log_file, &format!("Tidak ada data ditemukan untuk collection_id: "), "", cid_1, &format!("collection_id: "));
+			interactive_print(&pb, &format!("POST request gagal untuk collection_id:: {}", cid_1));
+			interactive_print(&pb, &format!("Status: {}", status));
+			break;
 		}
-	}else {
-		interactive_print(&pb, &format!("POST request gagal untuk collection_id:: {}", cid_1));
-		interactive_print(&pb, &format!("Status: {}", status));
 	}
 	Ok(())	
 }
@@ -445,7 +465,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = std::env::args().collect();
 	
 	println!("-------------------------------------------");
-	println!("get_vouchers_by_collections [Version 1.1.8]");
+	println!("get_vouchers_by_collections [Version 1.1.9]");
 	println!("");
 	println!("Dapatkan Info terbaru di https://google.com");
 	println!("");
