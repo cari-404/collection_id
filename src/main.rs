@@ -1,6 +1,8 @@
 /*
 This Is a first version of get_vouchers_by_collections
 This version using api reqwest
+Whats new In 1.2.1 :
+trim code
 Whats new In 1.2.0 :
 New Folder logs
 restructure new format arguments (structopt)
@@ -9,9 +11,6 @@ single function processing Response
 Whats new In 1.1.9 :
 restructure new header
 new url
-Whats new In 1.1.8 :
-Add csrftoken function
-restructure header
 */
 
 use reqwest::{self, ClientBuilder, header::HeaderMap, Error, Response, Version};
@@ -47,16 +46,16 @@ struct VoucherCollectionRequest {
 #[derive(Debug, StructOpt)]
 #[structopt(name = "get_vouchers_by_collections", about = "get_vouchers_by_collections")]
 struct Opt {
-    #[structopt(short, long, help = "Start scan collection_id")]
-    start: Option<String>,    
-    #[structopt(short, long, help = "End scan collection_id")]
-    end: Option<String>,    
-    #[structopt(short, long, help = "Target Code")]
-    v_code: Option<String>,
+	#[structopt(short, long, help = "Start scan collection_id")]
+	start: Option<String>,
+	#[structopt(short, long, help = "End scan collection_id")]
+	end: Option<String>,
+	#[structopt(short, long, help = "Target Code")]
+	v_code: Option<String>,
 	#[structopt(short, long, help = "select file cookie")]
-    file: Option<String>,
+	file: Option<String>,
 	#[structopt(short, long, help = "Set default cookie file")]
-    cookie: bool,
+	cookie: bool,
 }
 
 fn extract_csrftoken(cookie_string: &str) -> String {
@@ -96,30 +95,7 @@ async fn process_arguments2(start: &str, end: &str, v_code: &str, selected_file:
 }
 
 async fn manual_input() -> Result<()> {
-	// Display the list of available cookie files
-	println!("Daftar file cookie yang tersedia:");
-	let files = std::fs::read_dir("./akun")?;
-	let mut file_options = Vec::new();
-	for (index, file) in files.enumerate() {
-		if let Ok(file) = file {
-			let file_name = file.file_name();
-			println!("{}. {}", index + 1, file_name.to_string_lossy());
-			file_options.push(file_name.to_string_lossy().to_string());
-		}
-	}
-
-	// Select the file number for the cookie
-	let selected_file = loop {
-		let input = get_user_input("Pilih nomor file cookie yang ingin digunakan: ");
-
-		// Convert input to index number
-		if let Ok(index) = input.trim().parse::<usize>() {
-			if index > 0 && index <= file_options.len() {
-				break file_options[index - 1].clone();
-			}
-		}
-	};
-
+	let selected_file = choose_cookie()?;
 	// Read the content of the selected cookie file
 	let file_path = format!("./akun/{}", selected_file);
 	let mut cookie_content = String::new();
@@ -409,7 +385,7 @@ async fn api_1(pb: &ProgressBar, cid_1: &str, headers: &HeaderMap, v_code: &str,
 	loop {
 		let response = make_http_request(&cloned_headers, json_body.clone()).await?;
 		let status = response.status();
-		let text = response.text().await?;	
+		let text = response.text().await?;
 		if status == reqwest::StatusCode::OK {
 			let hasil: Value = serde_json::from_str(&text)?;
 			let error_res = hasil.get("error").and_then(|er| er.as_i64()).unwrap_or(0);
@@ -443,7 +419,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 	let opt = Opt::from_args();
 	
 	println!("-------------------------------------------");
-	println!("get_vouchers_by_collections [Version 1.2.0]");
+	println!("get_vouchers_by_collections [Version 1.2.1]");
 	println!("");
 	println!("Dapatkan Info terbaru di https://google.com");
 	println!("");
@@ -472,7 +448,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 	}
 	Ok(())
 }
-fn choose_and_save_cookie() -> Result<(), Box<dyn std::error::Error>> {
+fn choose_cookie() -> Result<String> {
 	// Menampilkan daftar file cookie yang tersedia
 	println!("Daftar file cookie yang tersedia:");
 	let files = std::fs::read_dir("./akun")?;
@@ -495,9 +471,13 @@ fn choose_and_save_cookie() -> Result<(), Box<dyn std::error::Error>> {
 			}
 		}
 	};
+	Ok(selected_file)
+}
+fn choose_and_save_cookie() -> Result<()> {
+	let selected_file = choose_cookie();
 	// Simpan nama file cookie yang dipilih ke dalam akun.conf
 	let mut akun_conf_file = File::create("akun.conf")?;
-	write!(akun_conf_file, "{}", selected_file)?;
+	write!(akun_conf_file, "{:?}", selected_file)?;
 
 	Ok(())
 }
