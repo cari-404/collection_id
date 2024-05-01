@@ -1,6 +1,9 @@
 /*
 This Is a first version of get_vouchers_by_collections
 This version using api reqwest
+Whats new In 1.2.2 :
+fix failing result (headers)
+reduce code arguments
 Whats new In 1.2.1 :
 trim code
 Whats new In 1.2.0 :
@@ -8,9 +11,6 @@ New Folder logs
 restructure new format arguments (structopt)
 universal input
 single function processing Response
-Whats new In 1.1.9 :
-restructure new header
-new url
 */
 
 use reqwest::{self, ClientBuilder, header::HeaderMap, Error, Response, Version};
@@ -82,29 +82,17 @@ async fn process_arguments(start: &str, end: &str, v_code: &str) -> Result<()> {
 	Ok(())
 }
 
-async fn process_arguments2(start: &str, end: &str, v_code: &str, selected_file: &str) -> Result<()> {
-	// Read the content of "akun.conf"
-	let file_path = format!("./akun/{}", selected_file);
-	let mut cookie_content = String::new();
-	File::open(&file_path)?.read_to_string(&mut cookie_content)?;
-
-	// Process HTTP with common function
-	some_function(start, end, v_code, &cookie_content, &selected_file).await?;
-
-	Ok(())
-}
-
-async fn manual_input() -> Result<()> {
-	let selected_file = choose_cookie()?;
+async fn manual_input(opt: &Opt) -> Result<()> {
+	let selected_file = opt.file.clone().unwrap_or_else(|| choose_cookie().expect("Folder akun dan file cookie tidak ada\n"));
 	// Read the content of the selected cookie file
 	let file_path = format!("./akun/{}", selected_file);
 	let mut cookie_content = String::new();
 	File::open(&file_path)?.read_to_string(&mut cookie_content)?;
 	
 	println!("Contoh input: Awal: 12905192072, Akhir: 12905192100");
-	let start = get_user_input("Masukkan nilai start: ");
-	let end = get_user_input("Masukkan nilai akhir: ");
-	let v_code = get_user_input("Masukkan voucher_code: ");
+	let start = opt.start.clone().unwrap_or_else(|| get_user_input("Masukkan nilai start: "));
+	let end = opt.end.clone().unwrap_or_else(|| get_user_input("Masukkan nilai akhir: "));
+	let v_code = opt.v_code.clone().unwrap_or_else(|| get_user_input("Masukkan voucher_code: "));
 
 	// Process HTTP with common function
 	match some_function(&start, &end, &v_code, &cookie_content, &selected_file).await {
@@ -201,20 +189,15 @@ async fn some_function(start: &str, end: &str, v_code: &str, cookie_content: &st
 			};
 			
 			let mut headers = reqwest::header::HeaderMap::new();
-			headers.insert("User-Agent", reqwest::header::HeaderValue::from_static("Android app Shopee appver=32250 app_type=1"));
+			headers.insert("User-Agent", reqwest::header::HeaderValue::from_static("Android app Shopee appver=29330 app_type=13"));
 			headers.insert("accept", reqwest::header::HeaderValue::from_static("application/json"));
 			headers.insert("Content-Type", reqwest::header::HeaderValue::from_static("application/json"));
 			headers.insert("x-api-source", reqwest::header::HeaderValue::from_static("rn"));
+			headers.insert("x-shopee-language", reqwest::header::HeaderValue::from_static("id"));
 			headers.insert("if-none-match-", reqwest::header::HeaderValue::from_static("55b03-8f1a78d495601e3a183dd4c1efb8ac00"));
 			headers.insert("shopee_http_dns_mode", reqwest::header::HeaderValue::from_static("1"));
-			headers.insert("x-shopee-client-timezone", reqwest::header::HeaderValue::from_static("Asia/Jakarta"));
-			headers.insert("af-ac-enc-dat", reqwest::header::HeaderValue::from_static(""));
-			headers.insert("af-ac-enc-id", reqwest::header::HeaderValue::from_static(""));
-			headers.insert("x-sap-access-t", reqwest::header::HeaderValue::from_static(""));
-			headers.insert("x-sap-access-f", reqwest::header::HeaderValue::from_static(""));
 			headers.insert("referer", reqwest::header::HeaderValue::from_static("https://mall.shopee.co.id/"));
 			headers.insert("x-csrftoken", reqwest::header::HeaderValue::from_str(&csrftoken_string)?);
-			headers.insert("af-ac-enc-sz-token", reqwest::header::HeaderValue::from_static(""));
 			headers.insert(reqwest::header::COOKIE, reqwest::header::HeaderValue::from_str(&cookie_content)?);
 
 			// Bentuk struct JsonRequest
@@ -419,7 +402,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 	let opt = Opt::from_args();
 	
 	println!("-------------------------------------------");
-	println!("get_vouchers_by_collections [Version 1.2.1]");
+	println!("get_vouchers_by_collections [Version 1.2.2]");
 	println!("");
 	println!("Dapatkan Info terbaru di https://google.com");
 	println!("");
@@ -435,16 +418,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 			opt.end.as_ref().map(String::as_str).unwrap_or_default(),
 			opt.v_code.as_ref().map(String::as_str).unwrap_or_default(),
 		).await?;
-	}else if !opt.start.is_none() && !opt.end.is_none() && !opt.v_code.is_none() && !opt.file.is_none() {
-		println!("Metode Cepat: Menjalankan main.exe dengan empat argumen.");
-		process_arguments2(
-			opt.start.as_ref().map(String::as_str).unwrap_or_default(),
-			opt.end.as_ref().map(String::as_str).unwrap_or_default(),
-			opt.v_code.as_ref().map(String::as_str).unwrap_or_default(),
-			opt.file.as_ref().map(String::as_str).unwrap_or_default()
-		).await?;
 	} else {
-		manual_input().await?;
+		manual_input(&opt).await?;
 	}
 	Ok(())
 }
