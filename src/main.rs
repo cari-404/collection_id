@@ -1,19 +1,14 @@
 /*
 This Is a first version of get_vouchers_by_collections
 This version using api reqwest
+Whats new In 1.2.3 :
+fix error?
 Whats new In 1.2.2-r1 :
 Base from 1.2.2
 special header 
 Whats new In 1.2.2 :
 fix failing result (headers)
 reduce code arguments
-Whats new In 1.2.1 :
-trim code
-Whats new In 1.2.0 :
-New Folder logs
-restructure new format arguments (structopt)
-universal input
-single function processing Response
 */
 
 use reqwest::{self, ClientBuilder, header::HeaderMap, Error, Response, Version};
@@ -192,12 +187,12 @@ async fn some_function(start: &str, end: &str, v_code: &str, cookie_content: &st
 			};
 			
 			let mut headers = reqwest::header::HeaderMap::new();
-			headers.insert("User-Agent", reqwest::header::HeaderValue::from_static("Android app Shopee appver=29330 app_type=1"));
+			headers.insert("User-Agent", reqwest::header::HeaderValue::from_static("Android app Shopee appver=29330 app_type=13"));
 			headers.insert("accept", reqwest::header::HeaderValue::from_static("application/json"));
 			headers.insert("Content-Type", reqwest::header::HeaderValue::from_static("application/json"));
 			headers.insert("x-api-source", reqwest::header::HeaderValue::from_static("rn"));
 			headers.insert("x-shopee-language", reqwest::header::HeaderValue::from_static("id"));
-			headers.insert("if-none-match-", reqwest::header::HeaderValue::from_static("55b03-ca1ed3c16239d85e681812528349d009"));
+			headers.insert("if-none-match-", reqwest::header::HeaderValue::from_static("55b03-8f1a78d495601e3a183dd4c1efb8ac00"));
 			headers.insert("shopee_http_dns_mode", reqwest::header::HeaderValue::from_static("1"));
 			headers.insert("referer", reqwest::header::HeaderValue::from_static("https://mall.shopee.co.id/"));
 			headers.insert("x-csrftoken", reqwest::header::HeaderValue::from_str(&csrftoken_string)?);
