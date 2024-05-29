@@ -400,7 +400,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 	let opt = Opt::from_args();
 	
 	println!("-------------------------------------------");
-	println!("get_vouchers_by_collections [Version 1.2.2]");
+	println!("get_vouchers_by_collections [Version 1.2.3]");
 	println!("");
 	println!("Dapatkan Info terbaru di https://google.com");
 	println!("");
