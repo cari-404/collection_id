@@ -1,6 +1,6 @@
 [package]
 name = "main"
-version = "1.2.3"
+version = "1.2.3-r1"
 edition = "2021"
 description = "Get Voucher By Collections"
 build = "build.rs"
@@ -30,4 +30,4 @@ indicatif = "0.17"
 atty = "0.2.14"
 structopt = "0.3"
 windows-version = "0.1.0"
-windows = "0.56.0"
+windows = "0.52.0"
