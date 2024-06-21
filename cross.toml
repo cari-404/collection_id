@@ -1,6 +1,6 @@
 [package]
 name = "main"
-version = "1.2.3-r2"
+version = "1.2.4"
 edition = "2021"
 description = "Get Voucher By Collections"
 build = "build.rs"
