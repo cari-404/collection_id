@@ -98,7 +98,7 @@ jobs:
         cargo ndk -t armeabi-v7a -t arm64-v8a build --release
 
     - name: install
-      if: matrix.platform.os_name == 'Windows7-x86_64' && matrix.platform.os_name == 'Windows7-i686'
+      if: matrix.platform.os_name == 'Windows7-x86_64' || matrix.platform.os_name == 'Windows7-i686'
       run: |
         rustup install 1.77.2
         rustup default 1.77.2-${{ matrix.platform.target }}
