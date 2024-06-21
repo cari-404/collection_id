@@ -299,14 +299,14 @@ async fn process_response(pb: &ProgressBar, v_code: &str, mut log_file: &File, t
 									print_and_log(&pb, &mut log_file, &format!("voucher_code      : "), green, voucher_code, &format!("voucher_code: "));
 									print_and_log(&pb, &mut log_file, &format!("signature         : "), green, signature, &format!("signature: "));
 									print_and_log(&pb, &mut log_file, &format!("collection_id     : "), green, collection_id, &format!("collection_id: "));
-									print_and_log(&pb, &mut log_file, &format!("Link              : "), "", url, &format!("Link: "));
+									print_and_log(&pb, &mut log_file, &format!("Link              : "), "", &url, &format!("Link: "));
 									// Exit the program if a matching voucher code is found
 									interactive_print(&pb, &format!("Voucher code found. Program selesai."));
 									process::exit(1);
 								} else {
 									print_and_log(&pb, &mut log_file, &format!("voucher_code yang ditemukan : "), yellow, voucher_code, &format!("voucher_code yang ditemukan: "));
 									print_and_log(&pb, &mut log_file, &format!("collection_id               : "), green, collection_id, &format!("collection_id: "));
-									print_and_log(&pb, &mut log_file, &format!("Link                        : "), "", url, &format!("Link: "));
+									print_and_log(&pb, &mut log_file, &format!("Link                        : "), "", &url, &format!("Link: "));
 									return rcode;
 								}
 							}
