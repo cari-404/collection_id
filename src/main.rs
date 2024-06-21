@@ -1,14 +1,13 @@
 /*
 This Is a first version of get_vouchers_by_collections
 This version using api reqwest
+Whats new In 1.2.4 :
+add info link
 Whats new In 1.2.3 :
 fix error?
 Whats new In 1.2.2-r1 :
 Base from 1.2.2
 special header 
-Whats new In 1.2.2 :
-fix failing result (headers)
-reduce code arguments
 */
 
 use reqwest::{self, ClientBuilder, header::HeaderMap, Error, Response, Version};
@@ -290,21 +289,24 @@ async fn process_response(pb: &ProgressBar, v_code: &str, mut log_file: &File, t
 								let voucher_code = voucher_identifier_obj.get("voucher_code").and_then(|vc| vc.as_str()).unwrap_or("");
 								let signature = voucher_identifier_obj.get("signature").and_then(|s| s.as_str()).unwrap_or("");
 								let collection_id = data_value.get("collection_id").and_then(|ci| ci.as_str()).unwrap_or("");
+								let promotion_id_str = promotion_id.to_string();
+								let url = format!("https://shopee.co.id/voucher/details?&evcode=null&from_source=paijo&promotionId={}&signature={}&source=0", promotion_id_str, signature);
 								// Check if v_code matches the found voucher_code
 								if v_code.trim() == voucher_code_value {
-									let promotion_id_str = promotion_id.to_string();
 									// Set the flag to true when a voucher code is found
-									print_and_log(&pb, &mut log_file, &format!("Voucher ditemukan:"), "", "", &format!("Voucher ditemukan:"));
-									print_and_log(&pb, &mut log_file, &format!("promotion_id: "), green, &promotion_id_str, &format!("promotion_id: "));
-									print_and_log(&pb, &mut log_file, &format!("voucher_code: "), green, voucher_code, &format!("voucher_code: "));
-									print_and_log(&pb, &mut log_file, &format!("signature: "), green, signature, &format!("signature: "));
-									print_and_log(&pb, &mut log_file, &format!("collection_id: "), green, collection_id, &format!("collection_id: "));
+									print_and_log(&pb, &mut log_file, &format!("Voucher ditemukan :"), "", "", &format!("Voucher ditemukan:"));
+									print_and_log(&pb, &mut log_file, &format!("promotion_id      : "), green, &promotion_id_str, &format!("promotion_id: "));
+									print_and_log(&pb, &mut log_file, &format!("voucher_code      : "), green, voucher_code, &format!("voucher_code: "));
+									print_and_log(&pb, &mut log_file, &format!("signature         : "), green, signature, &format!("signature: "));
+									print_and_log(&pb, &mut log_file, &format!("collection_id     : "), green, collection_id, &format!("collection_id: "));
+									print_and_log(&pb, &mut log_file, &format!("Link              : "), "", url, &format!("Link: "));
 									// Exit the program if a matching voucher code is found
 									interactive_print(&pb, &format!("Voucher code found. Program selesai."));
 									process::exit(1);
 								} else {
-									print_and_log(&pb, &mut log_file, &format!("voucher_code yang ditemukan: "), yellow, voucher_code, &format!("voucher_code yang ditemukan: "));
-									print_and_log(&pb, &mut log_file, &format!("collection_id: "), green, collection_id, &format!("collection_id: "));
+									print_and_log(&pb, &mut log_file, &format!("voucher_code yang ditemukan : "), yellow, voucher_code, &format!("voucher_code yang ditemukan: "));
+									print_and_log(&pb, &mut log_file, &format!("collection_id               : "), green, collection_id, &format!("collection_id: "));
+									print_and_log(&pb, &mut log_file, &format!("Link                        : "), "", url, &format!("Link: "));
 									return rcode;
 								}
 							}
@@ -400,7 +402,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 	let opt = Opt::from_args();
 	
 	println!("-------------------------------------------");
-	println!("get_vouchers_by_collections [Version 1.2.3]");
+	println!("get_vouchers_by_collections [Version 1.2.4]");
 	println!("");
 	println!("Dapatkan Info terbaru di https://google.com");
 	println!("");
