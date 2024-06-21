@@ -42,7 +42,7 @@ jobs:
             bin: main-amd64.exe
           - os_name: Windows7-x86_64
             os: windows-latest
-            target: x86_64-win7-windows-msvc
+            target: x86_64-win-windows-msvc
             bin: main7-amd64.exe
           - os_name: Windows-i686
             os: windows-latest
@@ -50,7 +50,7 @@ jobs:
             bin: main-i686.exe
           - os_name: Windows7-i686
             os: windows-latest
-            target: i686-win7-windows-msvc
+            target: i686-win-windows-msvc
             bin: main7-i686.exe
           - os_name: Windows-i586
             os: windows-latest
@@ -74,7 +74,7 @@ jobs:
         mv cross.toml Cargo.toml
     - name: Build binary
       uses: houseabsolute/actions-rust-cross@v0
-      if: matrix.platform.os_name != 'Android-aarch64' && matrix.platform.os_name != 'Windows-i586'
+      if: matrix.platform.os_name != 'Android-aarch64' && matrix.platform.os_name != 'Windows-i586' && matrix.platform.os_name != 'Windows7-x86_64' && matrix.platform.os_name != 'Windows7-i686'
       with:
         command: "build"
         target: ${{ matrix.platform.target }}
@@ -82,7 +82,7 @@ jobs:
         args: "--release"
         strip: true
     - name: Build binary
-      if: matrix.platform.os_name == 'Android-aarch64' && matrix.platform.os_name != 'Windows-i586'
+      if: matrix.platform.os_name == 'Android-aarch64' && matrix.platform.os_name != 'Windows-i586' && matrix.platform.os_name != 'Windows7-x86_64' && matrix.platform.os_name != 'Windows7-i686'
       uses: actions-rs/toolchain@v1
       with:
           toolchain: stable
@@ -96,6 +96,13 @@ jobs:
         cargo install cargo-ndk
         rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android i686-linux-android
         cargo ndk -t armeabi-v7a -t arm64-v8a build --release
+
+    - name: install
+      if: matrix.platform.os_name == 'Windows7-x86_64' && matrix.platform.os_name == 'Windows7-i686'
+      run: |
+        rustup install 1.77.2
+        rustup default 1.77.2-${{ matrix.platform.target }}
+        cargo build --release --target ${{ matrix.platform.target }}
 
     - name: install
       if: matrix.platform.os_name == 'Windows-i586'
