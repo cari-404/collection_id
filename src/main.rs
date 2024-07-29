@@ -10,6 +10,7 @@ fix error?
 */
 
 use reqwest::{self, ClientBuilder, header::HeaderMap, Error, Response, Version};
+use reqwest::header::HeaderValue;
 use serde::Serialize;
 use serde_json::{self, Value};
 use anyhow::Result;
@@ -185,27 +186,27 @@ async fn some_function(start: &str, end: &str, v_code: &str, cookie_content: &st
 			};
 			
 			let mut headers = reqwest::header::HeaderMap::new();
-			headers.insert("User-Agent", Reqwest::header::HeaderValue::from_static("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36"));
-			headers.insert("Connection", Reqwest::header::HeaderValue::from_static("keep-alive"));
-			headers.insert("accept", Reqwest::header::HeaderValue::from_static("application/json"));
-			headers.insert("Accept-Encoding", Reqwest::header::HeaderValue::from_static("gzip"));
-			headers.insert("Content-Type", Reqwest::header::HeaderValue::from_static("application/json"));
-			headers.insert("sec-ch-ua", Reqwest::header::HeaderValue::from_static("\"Not)A;Brand\";v=\"99\", \"Google Chrome\";v=\"127\", \"Chromium\";v=\"127\""));
-			headers.insert("sec-ch-ua-mobile", Reqwest::header::HeaderValue::from_static("?0"));
-			headers.insert("x-sz-sdk-version", Reqwest::header::HeaderValue::from_static("1.10.12"));
-			headers.insert("x-api-source", Reqwest::header::HeaderValue::from_static("pc"));
-			headers.insert("x-sap-ri", Reqwest::header::HeaderValue::from_static("8fab8288812ce5572fd20624a59333cea398a23b43b3f793"));
-			headers.insert("x-shopee-language", Reqwest::header::HeaderValue::from_static("id"));
-			headers.insert("x-requested-with", Reqwest::header::HeaderValue::from_static("XMLHttpRequest"));
-			headers.insert("af-ac-enc-dat", Reqwest::header::HeaderValue::from_static("d4fd3f0079b47b69"));
-			headers.insert("af-ac-enc-sz-token", Reqwest::header::HeaderValue::from_static(" "));
-			headers.insert("sec-ch-ua-platform", Reqwest::header::HeaderValue::from_static("\"Windows\""));
-			headers.insert("origin", Reqwest::header::HeaderValue::from_static("https://shopee.co.id"));
-			headers.insert("sec-fetch-site", Reqwest::header::HeaderValue::from_static("same-origin"));
-			headers.insert("sec-fetch-mode", Reqwest::header::HeaderValue::from_static("cors"));
-			headers.insert("sec-fetch-dest", Reqwest::header::HeaderValue::from_static("empty"));
-			headers.insert("accept-language", Reqwest::header::HeaderValue::from_static("en-US,en;q=0.9,id;q=0.8"));
-			headers.insert("referer", Reqwest::header::HeaderValue::from_static("https://shopee.co.id/"));
+			headers.insert("User-Agent", HeaderValue::from_static("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36"));
+			headers.insert("Connection", HeaderValue::from_static("keep-alive"));
+			headers.insert("accept", HeaderValue::from_static("application/json"));
+			headers.insert("Accept-Encoding", HeaderValue::from_static("gzip"));
+			headers.insert("Content-Type", HeaderValue::from_static("application/json"));
+			headers.insert("sec-ch-ua", HeaderValue::from_static("\"Not)A;Brand\";v=\"99\", \"Google Chrome\";v=\"127\", \"Chromium\";v=\"127\""));
+			headers.insert("sec-ch-ua-mobile", HeaderValue::from_static("?0"));
+			headers.insert("x-sz-sdk-version", HeaderValue::from_static("1.10.12"));
+			headers.insert("x-api-source", HeaderValue::from_static("pc"));
+			headers.insert("x-sap-ri", HeaderValue::from_static("8fab8288812ce5572fd20624a59333cea398a23b43b3f793"));
+			headers.insert("x-shopee-language", HeaderValue::from_static("id"));
+			headers.insert("x-requested-with", HeaderValue::from_static("XMLHttpRequest"));
+			headers.insert("af-ac-enc-dat", HeaderValue::from_static("d4fd3f0079b47b69"));
+			headers.insert("af-ac-enc-sz-token", HeaderValue::from_static(" "));
+			headers.insert("sec-ch-ua-platform", HeaderValue::from_static("\"Windows\""));
+			headers.insert("origin", HeaderValue::from_static("https://shopee.co.id"));
+			headers.insert("sec-fetch-site", HeaderValue::from_static("same-origin"));
+			headers.insert("sec-fetch-mode", HeaderValue::from_static("cors"));
+			headers.insert("sec-fetch-dest", HeaderValue::from_static("empty"));
+			headers.insert("accept-language", HeaderValue::from_static("en-US,en;q=0.9,id;q=0.8"));
+			headers.insert("referer", HeaderValue::from_static("https://shopee.co.id/"));
 			headers.insert("x-csrftoken", reqwest::header::HeaderValue::from_str(&csrftoken_string)?);
 			headers.insert(reqwest::header::COOKIE, reqwest::header::HeaderValue::from_str(&cookie_content)?);
 
@@ -412,9 +413,9 @@ async fn api_1(pb: &ProgressBar, cid_1: &str, headers: &HeaderMap, v_code: &str,
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
 	let opt = Opt::from_args();
-	
+	let version_info = env!("CARGO_PKG_VERSION");
 	println!("-------------------------------------------");
-	println!("get_vouchers_by_collections [Version 1.2.4]");
+	println!("get_vouchers_by_collections [Version {}]", version_info);
 	println!("");
 	println!("Dapatkan Info terbaru di https://google.com");
 	println!("");
