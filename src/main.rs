@@ -1,13 +1,12 @@
 /*
 This Is a first version of get_vouchers_by_collections
 This version using api reqwest
+Whats new In 1.2.5 :
+new header
 Whats new In 1.2.4 :
 add info link
 Whats new In 1.2.3 :
 fix error?
-Whats new In 1.2.2-r1 :
-Base from 1.2.2
-special header 
 */
 
 use reqwest::{self, ClientBuilder, header::HeaderMap, Error, Response, Version};
@@ -186,14 +185,27 @@ async fn some_function(start: &str, end: &str, v_code: &str, cookie_content: &st
 			};
 			
 			let mut headers = reqwest::header::HeaderMap::new();
-			headers.insert("User-Agent", reqwest::header::HeaderValue::from_static("Android app Shopee appver=29330 app_type=13"));
-			headers.insert("accept", reqwest::header::HeaderValue::from_static("application/json"));
-			headers.insert("Content-Type", reqwest::header::HeaderValue::from_static("application/json"));
-			headers.insert("x-api-source", reqwest::header::HeaderValue::from_static("rn"));
-			headers.insert("x-shopee-language", reqwest::header::HeaderValue::from_static("id"));
-			headers.insert("if-none-match-", reqwest::header::HeaderValue::from_static("55b03-8f1a78d495601e3a183dd4c1efb8ac00"));
-			headers.insert("shopee_http_dns_mode", reqwest::header::HeaderValue::from_static("1"));
-			headers.insert("referer", reqwest::header::HeaderValue::from_static("https://mall.shopee.co.id/"));
+			headers.insert("User-Agent", Reqwest::header::HeaderValue::from_static("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36"));
+			headers.insert("Connection", Reqwest::header::HeaderValue::from_static("keep-alive"));
+			headers.insert("accept", Reqwest::header::HeaderValue::from_static("application/json"));
+			headers.insert("Accept-Encoding", Reqwest::header::HeaderValue::from_static("gzip"));
+			headers.insert("Content-Type", Reqwest::header::HeaderValue::from_static("application/json"));
+			headers.insert("sec-ch-ua", Reqwest::header::HeaderValue::from_static("\"Not)A;Brand\";v=\"99\", \"Google Chrome\";v=\"127\", \"Chromium\";v=\"127\""));
+			headers.insert("sec-ch-ua-mobile", Reqwest::header::HeaderValue::from_static("?0"));
+			headers.insert("x-sz-sdk-version", Reqwest::header::HeaderValue::from_static("1.10.12"));
+			headers.insert("x-api-source", Reqwest::header::HeaderValue::from_static("pc"));
+			headers.insert("x-sap-ri", Reqwest::header::HeaderValue::from_static("8fab8288812ce5572fd20624a59333cea398a23b43b3f793"));
+			headers.insert("x-shopee-language", Reqwest::header::HeaderValue::from_static("id"));
+			headers.insert("x-requested-with", Reqwest::header::HeaderValue::from_static("XMLHttpRequest"));
+			headers.insert("af-ac-enc-dat", Reqwest::header::HeaderValue::from_static("d4fd3f0079b47b69"));
+			headers.insert("af-ac-enc-sz-token", Reqwest::header::HeaderValue::from_static(" "));
+			headers.insert("sec-ch-ua-platform", Reqwest::header::HeaderValue::from_static("\"Windows\""));
+			headers.insert("origin", Reqwest::header::HeaderValue::from_static("https://shopee.co.id"));
+			headers.insert("sec-fetch-site", Reqwest::header::HeaderValue::from_static("same-origin"));
+			headers.insert("sec-fetch-mode", Reqwest::header::HeaderValue::from_static("cors"));
+			headers.insert("sec-fetch-dest", Reqwest::header::HeaderValue::from_static("empty"));
+			headers.insert("accept-language", Reqwest::header::HeaderValue::from_static("en-US,en;q=0.9,id;q=0.8"));
+			headers.insert("referer", Reqwest::header::HeaderValue::from_static("https://shopee.co.id/"));
 			headers.insert("x-csrftoken", reqwest::header::HeaderValue::from_str(&csrftoken_string)?);
 			headers.insert(reqwest::header::COOKIE, reqwest::header::HeaderValue::from_str(&cookie_content)?);
 
