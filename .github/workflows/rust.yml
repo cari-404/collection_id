@@ -76,6 +76,11 @@ jobs:
         sudo apt install gcc-i686-linux-gnu
         sudo apt install libclang-dev
 
+    - name: Convert2
+      if: matrix.platform.os_name = 'Windows7-x86_64' && matrix.platform.os_name = 'Windows7-i686' && matrix.platform.os_name = 'Windows-x86_64' && matrix.platform.os_name = 'Windows-i686'  && matrix.platform.os_name = 'Windows-i586'
+      run: |
+        choco install nasm
+
     - name: Build binary
       uses: houseabsolute/actions-rust-cross@v0
       if: matrix.platform.os_name != 'Android-aarch64' && matrix.platform.os_name != 'Windows-i586' && matrix.platform.os_name != 'Windows7-x86_64' && matrix.platform.os_name != 'Windows7-i686'
