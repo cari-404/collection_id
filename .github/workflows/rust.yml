@@ -81,6 +81,11 @@ jobs:
       run: |
         choco install nasm
 
+    - name: Set LIBCLANG_PATH for 32-bit
+      if:  matrix.platform.os_name == 'Windows7-i686'
+      run: |
+        $env:LIBCLANG_PATH="C:\Program Files (x86)\LLVM\bin"
+
     - name: Build binary
       uses: houseabsolute/actions-rust-cross@v0
       if: matrix.platform.os_name != 'Android-aarch64' && matrix.platform.os_name != 'Windows-i586' && matrix.platform.os_name != 'Windows7-x86_64' && matrix.platform.os_name != 'Windows7-i686'
