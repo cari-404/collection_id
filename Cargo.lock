@@ -137,16 +137,16 @@ checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 
 [[package]]
 name = "bindgen"
-version = "0.69.4"
+version = "0.68.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a00dc851838a2120612785d195287475a3ac45514741da670b735818822129a0"
+checksum = "726e4313eb6ec35d2730258ad4e15b547ee75d6afaa1361a922e78e59b7d8078"
 dependencies = [
  "bitflags 2.6.0",
  "cexpr",
  "clang-sys",
- "itertools",
  "lazy_static",
  "lazycell",
+ "peeking_take_while",
  "proc-macro2",
  "quote",
  "regex",
@@ -169,38 +169,40 @@ checksum = "b048fb63fd8b5923fc5aa7b340d8e156aec7ec02f0c78fa8a6ddc2613f6f71de"
 
 [[package]]
 name = "boring-imp"
-version = "2.1.1"
+version = "4.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "09cf17120028694687f563bdc3a2cf38ed520aefa07f1f5587efdf3235a58c4b"
+checksum = "4ac4df4b6cced75945f0d95198c940f2e68a2c8af554b1c6b4780a2dd072d744"
 dependencies = [
- "bitflags 1.3.2",
+ "bitflags 2.6.0",
  "boring-sys-imp",
- "brotli 3.5.0",
+ "brotli 5.0.0",
  "flate2",
  "foreign-types",
- "lazy_static",
  "libc",
+ "once_cell",
 ]
 
 [[package]]
 name = "boring-sys-imp"
-version = "2.1.0"
+version = "4.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0431d29a07ca1091bda4aa0fed40b265b9bfca8302edbcab122f853e563aed4a"
+checksum = "c31858f041f245c8b4fe96478a1b158df27e94be18c8b6f35a73ddd1ca7581e4"
 dependencies = [
  "bindgen",
  "cmake",
+ "fs_extra",
+ "fslock",
 ]
 
 [[package]]
 name = "brotli"
-version = "3.5.0"
+version = "5.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d640d25bc63c50fb1f0b545ffd80207d2e10a4c965530809b40ba3386825c391"
+checksum = "19483b140a7ac7174d34b5a581b406c64f84da5409d3e09cf4fff604f9270e67"
 dependencies = [
  "alloc-no-stdlib",
  "alloc-stdlib",
- "brotli-decompressor 2.5.1",
+ "brotli-decompressor",
 ]
 
 [[package]]
@@ -211,17 +213,7 @@ checksum = "74f7971dbd9326d58187408ab83117d8ac1bb9c17b085fdacd1cf2f598719b6b"
 dependencies = [
  "alloc-no-stdlib",
  "alloc-stdlib",
- "brotli-decompressor 4.0.1",
-]
-
-[[package]]
-name = "brotli-decompressor"
-version = "2.5.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4e2e4afe60d7dd600fdd3de8d0f08c2b7ec039712e3b6137ff98b7004e82de4f"
-dependencies = [
- "alloc-no-stdlib",
- "alloc-stdlib",
+ "brotli-decompressor",
 ]
 
 [[package]]
@@ -355,12 +347,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "either"
-version = "1.13.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "60b1af1c220855b6ceac025d3f6ecdd2b7c4894bfe9cd9bda4fbb4bc7c0d4cf0"
-
-[[package]]
 name = "encode_unicode"
 version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -431,6 +417,22 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e13624c2627564efccf4934284bdd98cbaa14e79b0b5a141218e507b3a823456"
 dependencies = [
  "percent-encoding",
+]
+
+[[package]]
+name = "fs_extra"
+version = "1.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "42703706b716c37f96a77aea830392ad231f44c9e9a67872fa5548707e11b11c"
+
+[[package]]
+name = "fslock"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "04412b8935272e3a9bae6f48c7bfff74c2911f60525404edfdd28e49884c3bfb"
+dependencies = [
+ "libc",
+ "winapi",
 ]
 
 [[package]]
@@ -569,9 +571,9 @@ checksum = "df3b46402a9d5adb4c86a0cf463f42e19994e3ee891101b1841f30a545cb49a9"
 
 [[package]]
 name = "hyper-boring-imp"
-version = "2.2.2"
+version = "4.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3e224f7b4fc2b664a36f259dc106ffcd2f05fb65e7b58b5bfc09b36473a756a1"
+checksum = "0a8a6f7ce687fa1e0be3bae8d38e239f2d20bd93e3e098d7febd67a04494fe23"
 dependencies = [
  "antidote",
  "boring-imp",
@@ -678,15 +680,6 @@ name = "ipnet"
 version = "2.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8f518f335dce6725a761382244631d86cf0ccb2863413590b31338feb467f9c3"
-
-[[package]]
-name = "itertools"
-version = "0.12.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba291022dbbd398a455acf126c1e341954079855bc60dfdda641363bd6922569"
-dependencies = [
- "either",
-]
 
 [[package]]
 name = "itoa"
@@ -883,6 +876,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "peeking_take_while"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "19b17cddbe7ec3f8bc800887bab5e717348c95ea2ca0b1bf0837fb964dc67099"
+
+[[package]]
 name = "percent-encoding"
 version = "2.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -988,8 +987,8 @@ checksum = "7a66a03ae7c801facd77a29370b4faec201768915ac14a721ba36f20bc9c209b"
 
 [[package]]
 name = "rquest"
-version = "0.11.98"
-source = "git+https://github.com/0x676e67/rquest.git?tag=v0.11.98#4c2e5b240a195c9c103468003523d0992a6788ac"
+version = "0.11.103"
+source = "git+https://github.com/cari-404/rquest#feda47dd936fe2aa19c27d08ef4ec548e7f33299"
 dependencies = [
  "antidote",
  "async-compression",
@@ -1256,12 +1255,13 @@ dependencies = [
 
 [[package]]
 name = "tokio-boring-imp"
-version = "2.1.5"
+version = "4.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2924c36a5acdd80e92cddc6c9b4e6c956f1f01b5df05ed089f6b0252293a5437"
+checksum = "f692cd86daabad031b91c8c83fe4f7a6bee79bd2bf97550435aeb3aa0b3c0d29"
 dependencies = [
  "boring-imp",
  "boring-sys-imp",
+ "once_cell",
  "tokio",
 ]
 
