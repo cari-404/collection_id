@@ -1,15 +1,17 @@
 /*
 This Is a first version of get_vouchers_by_collections
 This version using api reqwest
+Whats new In 1.2.6 :
+Bugs Fix?
 Whats new In 1.2.5 :
 new header
 Whats new In 1.2.4 :
 add info link
-Whats new In 1.2.3 :
-fix error?
 */
 
-use reqwest::{self, ClientBuilder, header::HeaderMap, Error, Response, Version};
+use rquest as reqwest;
+use reqwest::impersonate::Impersonate;
+use reqwest::{ClientBuilder, header::HeaderMap, Error, Response, Version};
 use reqwest::header::HeaderValue;
 use serde::Serialize;
 use serde_json::{self, Value};
@@ -320,7 +322,6 @@ async fn process_response(pb: &ProgressBar, v_code: &str, mut log_file: &File, t
 									print_and_log(&pb, &mut log_file, &format!("voucher_code yang ditemukan : "), yellow, voucher_code, &format!("voucher_code yang ditemukan: "));
 									print_and_log(&pb, &mut log_file, &format!("collection_id               : "), green, collection_id, &format!("collection_id: "));
 									print_and_log(&pb, &mut log_file, &format!("Link                        : "), "", &url, &format!("Link: "));
-									return rcode;
 								}
 							}
 						}
@@ -342,8 +343,12 @@ async fn process_response(pb: &ProgressBar, v_code: &str, mut log_file: &File, t
 async fn make_http_request(headers: &HeaderMap, json_body: String) -> Result<Response, Error> {
 	// Buat klien HTTP
 	let client = ClientBuilder::new()
+		.danger_accept_invalid_certs(true)
+        .impersonate(Impersonate::Chrome127)
+        .enable_ech_grease()
+        .permute_extensions()
 		.gzip(true)
-		.use_rustls_tls() // Use Rustls for HTTPS
+		//.use_boring_tls(boring_tls_connector) // Use Rustls for HTTPS
 		.build()?;
 
 	// Buat permintaan HTTP POST
