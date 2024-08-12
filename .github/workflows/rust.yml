@@ -77,7 +77,7 @@ jobs:
         sudo apt install libclang-dev
 
     - name: Convert2
-      if: matrix.platform.os_name = 'Windows7-x86_64' && matrix.platform.os_name = 'Windows7-i686' && matrix.platform.os_name = 'Windows-x86_64' && matrix.platform.os_name = 'Windows-i686'  && matrix.platform.os_name = 'Windows-i586'
+      if: matrix.platform.os_name == 'Windows-x86_64' || matrix.platform.os_name == 'Windows-i686' || matrix.platform.os_name == 'Windows7-x86_64' || matrix.platform.os_name == 'Windows7-i686' || matrix.platform.os_name == 'Windows-i586'
       run: |
         choco install nasm
 
