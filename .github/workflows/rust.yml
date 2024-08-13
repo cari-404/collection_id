@@ -116,8 +116,8 @@ jobs:
     - name: install 7 32
       if: matrix.platform.os_name == 'Windows7-i686'
       run: |
-        ls -R C:\Program Files (x86)\LLVM\bin
-        ls -R C:\Program Files\LLVM\bin
+        ls -R "C:\Program Files (x86)\LLVM\bin"
+        ls -R "C:\Program Files\LLVM\bin"
         $env:LIBCLANG_PATH="C:\Program Files (x86)\LLVM\bin"
         rustup install 1.77.2
         rustup default 1.77.2-${{ matrix.platform.target }}
