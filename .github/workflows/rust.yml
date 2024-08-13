@@ -116,7 +116,7 @@ jobs:
     - name: install 7 32
       if: matrix.platform.os_name == 'Windows7-i686'
       run: |
-        choco install llvm --x86
+        choco install llvm --x86 --force
         ls -R "C:\Program Files (x86)\LLVM\bin"
         ls -R "C:\Program Files\LLVM\bin"
         $env:LIBCLANG_PATH="C:\Program Files (x86)\LLVM\bin"
