@@ -81,11 +81,6 @@ jobs:
       run: |
         choco install nasm
 
-    - name: Set LIBCLANG_PATH for 32-bit
-      if:  matrix.platform.os_name == 'Windows7-i686'
-      run: |
-        $env:LIBCLANG_PATH="C:\Program Files (x86)\LLVM\bin"
-
     - name: Build binary
       uses: houseabsolute/actions-rust-cross@v0
       if: matrix.platform.os_name != 'Android-aarch64' && matrix.platform.os_name != 'Windows-i586' && matrix.platform.os_name != 'Windows7-x86_64' && matrix.platform.os_name != 'Windows7-i686'
@@ -112,8 +107,16 @@ jobs:
         cargo ndk -t armeabi-v7a -t arm64-v8a build --release
 
     - name: install
-      if: matrix.platform.os_name == 'Windows7-x86_64' || matrix.platform.os_name == 'Windows7-i686'
+      if: matrix.platform.os_name == 'Windows7-x86_64'
       run: |
+        rustup install 1.77.2
+        rustup default 1.77.2-${{ matrix.platform.target }}
+        cargo build --release --target ${{ matrix.platform.target }}
+
+    - name: install 7 32
+      if: matrix.platform.os_name == 'Windows7-i686'
+      run: |
+        $env:LIBCLANG_PATH="C:\Program Files (x86)\LLVM\bin"
         rustup install 1.77.2
         rustup default 1.77.2-${{ matrix.platform.target }}
         cargo build --release --target ${{ matrix.platform.target }}
