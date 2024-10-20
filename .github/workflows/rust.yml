@@ -65,6 +65,7 @@ jobs:
       run: |
         sudo dpkg --add-architecture i386
         sudo apt update
+        apt search cmake
         sudo apt install gcc-mingw-w64 libc6-dev-i386 libssl-dev:i386 -y
 
     - name: Convert
@@ -74,7 +75,7 @@ jobs:
         mv cross.toml Cargo.toml
         sudo apt install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu libc6-dev-arm64-cross
         sudo apt install gcc-i686-linux-gnu g++-i686-linux-gnu libc6-dev-i386-cross
-        sudo apt install llvm-dev libclang-dev clang cmake:i386
+        sudo apt install llvm-dev libclang-dev clang
 
 
     - name: Convert2
