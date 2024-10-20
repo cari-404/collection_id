@@ -1,16 +1,16 @@
 /*
 This Is a first version of get_vouchers_by_collections
 This version using api reqwest
+Whats new In 1.2.8 :
+Bugs Fix?
+Whats new In 1.2.7 :
+Bugs Fix?
 Whats new In 1.2.6 :
 Bugs Fix?
-Whats new In 1.2.5 :
-new header
-Whats new In 1.2.4 :
-add info link
 */
 
 use rquest as reqwest;
-use reqwest::impersonate::Impersonate;
+use reqwest::tls::Impersonate;
 use reqwest::{ClientBuilder, header::HeaderMap, Error, Response, Version};
 use reqwest::header::HeaderValue;
 use serde::Serialize;
@@ -188,27 +188,22 @@ async fn some_function(start: &str, end: &str, v_code: &str, cookie_content: &st
 			};
 			
 			let mut headers = reqwest::header::HeaderMap::new();
-			headers.insert("User-Agent", HeaderValue::from_static("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36"));
+			headers.insert("User-Agent", HeaderValue::from_static("Android app Shopee appver=29335 app_type=1"));
 			headers.insert("Connection", HeaderValue::from_static("keep-alive"));
-			headers.insert("accept", HeaderValue::from_static("application/json"));
+			headers.insert("Accept", HeaderValue::from_static("application/json"));
 			headers.insert("Accept-Encoding", HeaderValue::from_static("gzip"));
 			headers.insert("Content-Type", HeaderValue::from_static("application/json"));
-			headers.insert("sec-ch-ua", HeaderValue::from_static("\"Not)A;Brand\";v=\"99\", \"Google Chrome\";v=\"127\", \"Chromium\";v=\"127\""));
-			headers.insert("sec-ch-ua-mobile", HeaderValue::from_static("?0"));
-			headers.insert("x-sz-sdk-version", HeaderValue::from_static("1.10.12"));
-			headers.insert("x-api-source", HeaderValue::from_static("pc"));
-			headers.insert("x-sap-ri", HeaderValue::from_static("8fab8288812ce5572fd20624a59333cea398a23b43b3f793"));
-			headers.insert("x-shopee-language", HeaderValue::from_static("id"));
-			headers.insert("x-requested-with", HeaderValue::from_static("XMLHttpRequest"));
-			headers.insert("af-ac-enc-dat", HeaderValue::from_static("d4fd3f0079b47b69"));
-			headers.insert("af-ac-enc-sz-token", HeaderValue::from_static(" "));
-			headers.insert("sec-ch-ua-platform", HeaderValue::from_static("\"Windows\""));
-			headers.insert("origin", HeaderValue::from_static("https://shopee.co.id"));
-			headers.insert("sec-fetch-site", HeaderValue::from_static("same-origin"));
-			headers.insert("sec-fetch-mode", HeaderValue::from_static("cors"));
-			headers.insert("sec-fetch-dest", HeaderValue::from_static("empty"));
-			headers.insert("accept-language", HeaderValue::from_static("en-US,en;q=0.9,id;q=0.8"));
-			headers.insert("referer", HeaderValue::from_static("https://shopee.co.id/"));
+			headers.insert("x-api-source", HeaderValue::from_static("rn"));
+			headers.insert("if-none-match-", HeaderValue::from_static("55b03-1e991df3597baecb4f87bfbe85b99329"));
+			headers.insert("af-ac-enc-dat", HeaderValue::from_static(""));
+			headers.insert("af-ac-enc-sz-token", HeaderValue::from_static(""));
+			headers.insert("shopee_http_dns_mode", HeaderValue::from_static("1"));
+			headers.insert("af-ac-enc-id", HeaderValue::from_static(""));
+			headers.insert("x-sap-access-t", HeaderValue::from_static(""));
+			headers.insert("x-sap-access-s", HeaderValue::from_static(""));
+			headers.insert("x-sap-access-f", HeaderValue::from_static(""));
+			headers.insert("x-shopee-client-timezone", HeaderValue::from_static("Asia/Jakarta"));
+			headers.insert("referer", HeaderValue::from_static("https://mall.shopee.co.id/"));
 			headers.insert("x-csrftoken", reqwest::header::HeaderValue::from_str(&csrftoken_string)?);
 			headers.insert(reqwest::header::COOKIE, reqwest::header::HeaderValue::from_str(&cookie_content)?);
 
@@ -344,7 +339,7 @@ async fn make_http_request(headers: &HeaderMap, json_body: String) -> Result<Res
 	// Buat klien HTTP
 	let client = ClientBuilder::new()
 		.danger_accept_invalid_certs(true)
-        .impersonate(Impersonate::Chrome127)
+        .impersonate_without_headers(Impersonate::Chrome129)
         .enable_ech_grease()
         .permute_extensions()
 		.gzip(true)
@@ -354,7 +349,6 @@ async fn make_http_request(headers: &HeaderMap, json_body: String) -> Result<Res
 	// Buat permintaan HTTP POST
 	let response = client
 		.post("https://mall.shopee.co.id/api/v1/microsite/get_vouchers_by_collections")
-		.header("Content-Type", "application/json")
 		.headers(headers.clone())
 		.body(json_body)
 		.version(Version::HTTP_2) 
