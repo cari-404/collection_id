@@ -42,7 +42,7 @@ jobs:
             bin: main-amd64.exe
           - os_name: Windows7-x86_64
             os: windows-latest
-            target: x86_64-pc-windows-msvc
+            target: x86_64-win7-windows-msvc
             bin: main7-amd64.exe
           - os_name: Windows-i686
             os: windows-latest
@@ -50,7 +50,7 @@ jobs:
             bin: main-i686.exe
           - os_name: Windows7-i686
             os: windows-latest
-            target: i686-pc-windows-msvc
+            target: i686-win7-windows-msvc
             bin: main7-i686.exe
           - os_name: Windows-i586
             os: windows-latest
