@@ -1,11 +1,11 @@
 /*
 This Is a first version of get_vouchers_by_collections
 This version using api reqwest
+Whats new In 1.3.0 :
+- add base64 encode for evcode
 Whats new In 1.2.9 :
 Bugs Fix?
 Whats new In 1.2.8 :
-Bugs Fix?
-Whats new In 1.2.7 :
 Bugs Fix?
 */
 
@@ -341,7 +341,7 @@ async fn make_http_request(headers: &HeaderMap, json_body: String) -> Result<Res
 	// Buat klien HTTP
 	let client = ClientBuilder::new()
 		.danger_accept_invalid_certs(true)
-        .impersonate_without_headers(Impersonate::Chrome130)
+        .impersonate_skip_headers(Impersonate::Chrome131)
         .enable_ech_grease(true)
         .permute_extensions(true)
 		.gzip(true)
