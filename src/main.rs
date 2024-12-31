@@ -23,6 +23,8 @@ use std::process;
 use indicatif::{ProgressBar, ProgressStyle};
 use chrono::{Local, Utc};
 use structopt::StructOpt;
+use base64::encode;
+use urlencoding::encode as url_encode;
 #[cfg(windows)]
 use windows_version::*;
 
@@ -300,7 +302,7 @@ async fn process_response(pb: &ProgressBar, v_code: &str, mut log_file: &File, t
 								let signature = voucher_identifier_obj.get("signature").and_then(|s| s.as_str()).unwrap_or("");
 								let collection_id = data_value.get("collection_id").and_then(|ci| ci.as_str()).unwrap_or("");
 								let promotion_id_str = promotion_id.to_string();
-								let url = format!("https://shopee.co.id/voucher/details?&evcode=null&from_source=paijo&promotionId={}&signature={}&source=0", promotion_id_str, signature);
+								let url = format!("https://shopee.co.id/voucher/details?&evcode={}&from_source=paijo&promotionId={}&signature={}&source=0", url_encode(&encode(voucher_code)), promotion_id_str, signature);
 								// Check if v_code matches the found voucher_code
 								if v_code.trim() == voucher_code_value {
 									// Set the flag to true when a voucher code is found
