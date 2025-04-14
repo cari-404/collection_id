@@ -8,6 +8,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  FINAL_VERSION: "1.3.1"
 
 permissions:
   contents: write
@@ -21,19 +22,19 @@ jobs:
       matrix:
         platform:
           - os_name: Android-aarch64
-            os: ubuntu-20.04
+            os: ubuntu-24.04
             target: aarch64-linux-android
             bin: main-linux-android-arm64
           - os_name: Linux-aarch64
-            os: ubuntu-20.04
+            os: ubuntu-24.04-arm
             target: aarch64-unknown-linux-gnu
             bin: main-linux-arm64
           - os_name: Linux-x86_64
-            os: ubuntu-20.04
+            os: ubuntu-24.04
             target: x86_64-unknown-linux-gnu
             bin: main-linux-amd64
           - os_name: Linux-i686
-            os: ubuntu-20.04
+            os: ubuntu-24.04
             target: i686-unknown-linux-musl
             bin: main-linux-i686
           - os_name: Windows-x86_64
@@ -52,10 +53,6 @@ jobs:
             os: windows-latest
             target: i686-win7-windows-msvc
             bin: main7-i686.exe
-          - os_name: Windows-i586
-            os: windows-latest
-            target: i586-pc-windows-msvc
-            bin: main-i586.exe
         toolchain:
           - stable
     steps:
@@ -65,59 +62,48 @@ jobs:
       run: |
         sudo dpkg --add-architecture i386
         sudo apt update
-        apt search cmake
-        sudo apt install gcc-mingw-w64 libc6-dev-i386 libssl-dev:i386 -y
+        sudo apt install build-essential gcc-multilib gcc-mingw-w64 libc6-dev-i386 libssl-dev:i386 libgcc-9-dev-i386-cross -y
+        sudo apt install build-essential gcc-aarch64-linux-gnu g++-aarch64-linux-gnu libc6-dev-arm64-cross libstdc++6-arm64-cross
+        sudo apt install gcc-i686-linux-gnu g++-i686-linux-gnu libc6-dev-i386-cross libstdc++6-i386-cross
+        sudo apt install llvm-dev libclang-dev clang libgcc-9-dev-arm64-cross
+        sudo apt install cmake g++-multilib gcc-multilib
 
     - name: Convert
-      if: matrix.platform.os_name == 'Linux-aarch64' || matrix.platform.os_name == 'Linux-i686'
+      if: matrix.platform.os_name == 'Linux-aarch64'
       run: |
-        rm Cargo.toml
-        mv cross.toml Cargo.toml
-        sudo apt install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu libc6-dev-arm64-cross
-        sudo apt install gcc-i686-linux-gnu g++-i686-linux-gnu libc6-dev-i386-cross
-        sudo apt install llvm-dev libclang-dev clang
-
+        sudo apt install build-essential gcc-aarch64-linux-gnu g++-aarch64-linux-gnu libc6-dev-arm64-cross libstdc++6-arm64-cross
+        sudo apt install llvm-dev libclang-dev clang libgcc-9-dev-arm64-cross
+        sudo apt install cmake g++-aarch64-linux-gnu gcc-aarch64-linux-gnu
+        clang --version
 
     - name: Convert2
-      if: matrix.platform.os_name == 'Windows-x86_64' || matrix.platform.os_name == 'Windows-i686' || matrix.platform.os_name == 'Windows7-x86_64' || matrix.platform.os_name == 'Windows7-i686' || matrix.platform.os_name == 'Windows-i586'
+      if: matrix.platform.os_name == 'Windows-x86_64' || matrix.platform.os_name == 'Windows-i686' || matrix.platform.os_name == 'Windows7-x86_64' || matrix.platform.os_name == 'Windows7-i686'
       run: |
         choco install nasm
 
-    - name: Build binary1
-      uses: actions-rs/cargo@v1
-      if: matrix.platform.os_name == 'Linux-aarch64' || matrix.platform.os_name == 'Linux-i686'
-      with:
-        use-cross: true
-        command: build
-        toolchain: ${{ matrix.toolchain }}
-        args: --release --target ${{ matrix.platform.target }}
+    - name: Build binary Linux
+      if: matrix.platform.os_name == 'Linux-x86_64' || matrix.platform.os_name == 'Linux-i686' || matrix.platform.os_name == 'Linux-aarch64'
+      run: |
+        rustup target add ${{ matrix.platform.target }}
+        cargo +stable build --release --target ${{ matrix.platform.target }}
 
-    - name: Build binary
+    - name: Build binary (Windows 10+)
       uses: houseabsolute/actions-rust-cross@v0
-      if: matrix.platform.os_name != 'Android-aarch64' && matrix.platform.os_name != 'Windows-i586' && matrix.platform.os_name != 'Windows7-x86_64' && matrix.platform.os_name != 'Windows7-i686' && matrix.platform.os_name != 'Linux-aarch64' && matrix.platform.os_name != 'Linux-i686'
+      if: matrix.platform.os_name == 'Windows-x86_64' || matrix.platform.os_name == 'Windows-i686' || matrix.platform.os_name == 'Windows-aarch64'
       with:
         command: "build"
         target: ${{ matrix.platform.target }}
         toolchain: ${{ matrix.toolchain }}
         args: "--release"
         strip: true
-    - name: Build binary
-      if: matrix.platform.os_name == 'Android-aarch64' && matrix.platform.os_name != 'Windows-i586' && matrix.platform.os_name != 'Windows7-x86_64' && matrix.platform.os_name != 'Windows7-i686' && matrix.platform.os_name != 'Linux-aarch64' && matrix.platform.os_name != 'Linux-i686'
-      uses: actions-rs/toolchain@v1
-      with:
-          toolchain: stable
-          override: true
-          components: rustfmt, clippy
-          target: ${{ matrix.platform.target }}
-
-    - name: install
+    - name: Build for Android-NDK
       if: matrix.platform.os_name == 'Android-aarch64'
       run: |
         cargo install cargo-ndk
         rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android i686-linux-android
         cargo ndk -t armeabi-v7a -t arm64-v8a build --release
 
-    - name: Install nightly toolchain for Windows 7 64-bit
+    - name: Build binary (Windows 7+ 64bit)
       if: matrix.platform.os_name == 'Windows7-x86_64'
       run: |
         rustup toolchain install nightly-x86_64-pc-windows-msvc
@@ -125,7 +111,7 @@ jobs:
         rustup component add rust-src --toolchain nightly-x86_64-pc-windows-msvc
         cargo +nightly-x86_64-pc-windows-msvc build --release -Z build-std=std,panic_abort --target x86_64-win7-windows-msvc
 
-    - name: Install nightly toolchain for Windows 7 32-bit
+    - name: Build binary (Windows 7+ 32bit)
       if: matrix.platform.os_name == 'Windows7-i686'
       run: |
         choco install llvm --x86 --force
@@ -137,28 +123,21 @@ jobs:
         rustup component add rust-src --toolchain nightly-i686-pc-windows-msvc
         cargo +nightly-i686-pc-windows-msvc build --release -Z build-std=std,panic_abort --target i686-win7-windows-msvc
 
-    - name: install
-      if: matrix.platform.os_name == 'Windows-i586'
-      run: |
-        rustup target add i586-pc-windows-msvc
-        cargo add windows
-        cargo build --release --target i586-pc-windows-msvc
-
     - name: Run tests
       run: ls -R
 
     - name: Rename binary (linux and macos)
       run: mv target/${{ matrix.platform.target }}/release/main target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}
-      if: matrix.platform.os_name != 'Windows7-x86_64' && matrix.platform.os_name != 'Windows7-i686' && matrix.platform.os_name != 'Windows-x86_64' && matrix.platform.os_name != 'Windows-i686' && matrix.platform.os_name != 'Windows-i586'
+      if: matrix.platform.os_name == 'Linux-x86_64' || matrix.platform.os_name == 'Linux-i686' || matrix.platform.os_name == 'Linux-aarch64' || matrix.platform.os_name == 'Android-aarch64'
     - name: Rename binary (windows)
       run: mv target/${{ matrix.platform.target }}/release/main.exe target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}
-      if: matrix.platform.os_name == 'Windows-x86_64' || matrix.platform.os_name == 'Windows-i686' || matrix.platform.os_name == 'Windows7-x86_64' || matrix.platform.os_name == 'Windows7-i686' || matrix.platform.os_name == 'Windows-i586'
+      if: matrix.platform.os_name == 'Windows-x86_64' || matrix.platform.os_name == 'Windows-i686' || matrix.platform.os_name == 'Windows7-x86_64' || matrix.platform.os_name == 'Windows7-i686'
 
     - name: Generate SHA-256
       run: shasum -a 256 target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }} | cut -d ' ' -f 1 > target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}.sha256
     - name: Release binary and SHA-256 checksum to GitHub
       uses: softprops/action-gh-release@v2
       with:
-        tag_name: v1.3.0
+        tag_name: v${{ env.FINAL_VERSION }}
         files: |
           target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}

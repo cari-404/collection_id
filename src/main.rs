@@ -1,11 +1,11 @@
 /*
 This Is a first version of get_vouchers_by_collections
-This version using api reqwest
+Whats new In 1.3.1 :
+- update dependencies
+- Recompiling
 Whats new In 1.3.0 :
 - add base64 encode for evcode
 Whats new In 1.2.9 :
-Bugs Fix?
-Whats new In 1.2.8 :
 Bugs Fix?
 */
 
@@ -477,7 +477,7 @@ fn get_user_input(prompt: &str) -> String {
 	io::stdin().read_line(&mut input).unwrap();
 	input.trim().to_string()
 }
-fn fix_start (start: &str) -> i64 {
+fn fix_start(start: &str) -> i64 {
 	let start: i64 = start.trim().parse().expect("Input tidak valid");
 	println!("Check Start");
 	let x = (start - 8) as f64 / 128.0;
@@ -488,8 +488,7 @@ fn fix_start (start: &str) -> i64 {
 		println!("Hitung pendekatannya");
 		let rounded_up = x.ceil() as i64;
 		println!("Pembulatan ke atas: {}", rounded_up);
-		let mulai = (rounded_up * 128) - 120;
-		mulai
+		(rounded_up * 128) - 120
 	}
 }
 
