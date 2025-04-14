@@ -35,7 +35,7 @@ jobs:
             bin: main-linux-amd64
           - os_name: Linux-i686
             os: ubuntu-24.04
-            target: i686-unknown-linux-musl
+            target: i686-unknown-linux-gnu
             bin: main-linux-i686
           - os_name: Windows-x86_64
             os: windows-latest
