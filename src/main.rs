@@ -1,12 +1,12 @@
 /*
 This Is a first version of get_vouchers_by_collections
+Whats new In 1.3.2 :
+- New Algorithm Method
 Whats new In 1.3.1 :
 - update dependencies
 - Recompiling
 Whats new In 1.3.0 :
 - add base64 encode for evcode
-Whats new In 1.2.9 :
-Bugs Fix?
 */
 
 use rquest as reqwest;
@@ -20,6 +20,7 @@ use std::fs::{self, OpenOptions, File};
 use std::path::Path;
 use std::io::{self, Write, prelude::*};
 use std::process;
+use std::sync::Arc;
 use indicatif::{ProgressBar, ProgressStyle};
 use chrono::{Local, Utc};
 use structopt::StructOpt;
@@ -28,12 +29,12 @@ use urlencoding::encode as url_encode;
 #[cfg(windows)]
 use windows_version::*;
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 struct JsonRequest {
 	voucher_collection_request_list: Vec<VoucherCollectionRequest>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 struct VoucherCollectionRequest {
 	collection_id: String,
 	component_type: i64,
@@ -135,6 +136,7 @@ fn interactive_print(pb: &ProgressBar, message: &str) {
 }
 
 async fn some_function(start: &str, end: &str, v_code: &str, cookie_content: &str, selected_file: &str) -> Result<()> {
+	let client = Arc::new(client_core());
 	let formatted_datetime = Utc::now().format("%Y-%m-%d_%H-%M-%S").to_string();
 	// Mengonversi nama akun menjadi format folder yang sesuai
 	let header_folder = format!("./header/{}/af-ac-enc-sz-token.txt", selected_file);
@@ -159,6 +161,7 @@ async fn some_function(start: &str, end: &str, v_code: &str, cookie_content: &st
 	let csrftoken = extract_csrftoken(&cookie_content_owned);
 	println!("csrftoken: {}", csrftoken);
 	let csrftoken_string = csrftoken.to_string();
+	let headers = Arc::new(create_headers(&cookie_content, &csrftoken_string));
 	let mulai = fix_start (&start);
 	let end: i64 = end.trim().parse().expect("Input tidak valid");
 
@@ -188,37 +191,14 @@ async fn some_function(start: &str, end: &str, v_code: &str, cookie_content: &st
 				offset: 0,
 				number_of_vouchers_per_row: 2,
 			};
-			
-			let mut headers = reqwest::header::HeaderMap::new();
-			headers.insert("User-Agent", HeaderValue::from_static("Android app Shopee appver=29335 app_type=1"));
-			headers.insert("Connection", HeaderValue::from_static("keep-alive"));
-			headers.insert("Accept", HeaderValue::from_static("application/json"));
-			headers.insert("Accept-Encoding", HeaderValue::from_static("gzip"));
-			headers.insert("Content-Type", HeaderValue::from_static("application/json"));
-			headers.insert("x-api-source", HeaderValue::from_static("rn"));
-			headers.insert("if-none-match-", HeaderValue::from_static("55b03-1e991df3597baecb4f87bfbe85b99329"));
-			headers.insert("af-ac-enc-dat", HeaderValue::from_static(""));
-			headers.insert("af-ac-enc-sz-token", HeaderValue::from_static(""));
-			headers.insert("shopee_http_dns_mode", HeaderValue::from_static("1"));
-			headers.insert("af-ac-enc-id", HeaderValue::from_static(""));
-			headers.insert("x-sap-access-t", HeaderValue::from_static(""));
-			headers.insert("x-sap-access-s", HeaderValue::from_static(""));
-			headers.insert("x-sap-access-f", HeaderValue::from_static(""));
-			headers.insert("x-shopee-client-timezone", HeaderValue::from_static("Asia/Jakarta"));
-			headers.insert("referer", HeaderValue::from_static("https://mall.shopee.co.id/"));
-			headers.insert("x-csrftoken", reqwest::header::HeaderValue::from_str(&csrftoken_string)?);
-			headers.insert(reqwest::header::COOKIE, reqwest::header::HeaderValue::from_str(&cookie_content)?);
 
 			// Bentuk struct JsonRequest
 			let json_request = JsonRequest {
 				voucher_collection_request_list: vec![voucher_request],
 			};
-
-			// Convert struct to JSON
-			let json_body = serde_json::to_string(&json_request)?;
 			
 			loop {
-				let response = make_http_request(&headers, json_body.clone()).await?;
+				let response = make_http_request(client.clone(), headers.clone(), &json_request).await?;
 				// Check for HTTP status code indicating an error
 				//let http_version = response.version(); 		// disable output features
 				//println!("HTTP Version: {:?}", http_version); // disable output features
@@ -255,7 +235,7 @@ async fn some_function(start: &str, end: &str, v_code: &str, cookie_content: &st
 					if rcode == "bug" {
 						print_and_log(&pb, &mut log_file, &format!("API Checker 1"), "", "", &format!("API Checker 1"));
 						let cid_1 = current.to_string();
-						api_1(&pb, &cid_1, &headers.clone(), v_code, &log_file).await?;
+						api_1(&pb, &cid_1, client.clone(), headers.clone(), v_code, &log_file).await?;
 					}else if rcode == "none" {
 						print_and_log(&pb, &mut log_file, &format!("Tidak ada data ditemukan untuk collection_id: "), "", &current.to_string(), &format!("collection_id: "));
 						print_and_log(&pb, &mut log_file, &format!("error : "), "", &error_res_str, &format!("error : "));
@@ -337,22 +317,45 @@ async fn process_response(pb: &ProgressBar, v_code: &str, mut log_file: &File, t
 	}
 	rcode.to_string()
 }
-async fn make_http_request(headers: &HeaderMap, json_body: String) -> Result<Response, Error> {
-	// Buat klien HTTP
-	let client = ClientBuilder::new()
+fn create_headers(cookie_content: &str, csrftoken_string: &str) -> HeaderMap {
+	let mut headers = reqwest::header::HeaderMap::new();
+	headers.insert("User-Agent", HeaderValue::from_static("Android app Shopee appver=29344 app_type=1"));
+	headers.insert("Connection", HeaderValue::from_static("keep-alive"));
+	headers.insert("Accept", HeaderValue::from_static("application/json"));
+	headers.insert("Accept-Encoding", HeaderValue::from_static("gzip"));
+	headers.insert("Content-Type", HeaderValue::from_static("application/json"));
+	headers.insert("x-api-source", HeaderValue::from_static("rn"));
+	headers.insert("if-none-match-", HeaderValue::from_static("55b03-1e991df3597baecb4f87bfbe85b99329"));
+	headers.insert("af-ac-enc-dat", HeaderValue::from_static(""));
+	headers.insert("af-ac-enc-sz-token", HeaderValue::from_static(""));
+	headers.insert("shopee_http_dns_mode", HeaderValue::from_static("1"));
+	headers.insert("af-ac-enc-id", HeaderValue::from_static(""));
+	headers.insert("x-sap-access-t", HeaderValue::from_static(""));
+	headers.insert("x-sap-access-s", HeaderValue::from_static(""));
+	headers.insert("x-sap-access-f", HeaderValue::from_static(""));
+	headers.insert("x-shopee-client-timezone", HeaderValue::from_static("Asia/Jakarta"));
+	headers.insert("referer", HeaderValue::from_static("https://mall.shopee.co.id/"));
+	headers.insert("x-csrftoken", reqwest::header::HeaderValue::from_str(&csrftoken_string).unwrap());
+	headers.insert(reqwest::header::COOKIE, reqwest::header::HeaderValue::from_str(&cookie_content).unwrap());
+    headers
+}
+fn client_core() -> reqwest::Client {
+	ClientBuilder::new()
 		.danger_accept_invalid_certs(true)
         .impersonate_skip_headers(Impersonate::Chrome131)
         .enable_ech_grease(true)
         .permute_extensions(true)
 		.gzip(true)
 		//.use_boring_tls(boring_tls_connector) // Use Rustls for HTTPS
-		.build()?;
-
+		.build()
+		.expect("Failed to create HTTP client")
+}
+async fn make_http_request(client: Arc<reqwest::Client>, headers: Arc<HeaderMap>, json_body: &JsonRequest) -> Result<Response, Error> {
 	// Buat permintaan HTTP POST
 	let response = client
 		.post("https://mall.shopee.co.id/api/v1/microsite/get_vouchers_by_collections")
-		.headers(headers.clone())
-		.body(json_body)
+		.headers((*headers).clone())
+		.json(&json_body)
 		.version(Version::HTTP_2) 
 		.send()
 		.await?;
@@ -360,8 +363,7 @@ async fn make_http_request(headers: &HeaderMap, json_body: String) -> Result<Res
 	Ok(response)
 }
 
-async fn api_1(pb: &ProgressBar, cid_1: &str, headers: &HeaderMap, v_code: &str, mut log_file: &File) -> Result<()> {
-	let cloned_headers = headers.clone();
+async fn api_1(pb: &ProgressBar, cid_1: &str, client: Arc<reqwest::Client>, headers: Arc<HeaderMap>, v_code: &str, mut log_file: &File) -> Result<()> {
 	let voucher_request = VoucherCollectionRequest {
 		collection_id: cid_1.to_string(),
 		component_type: 1,
@@ -375,12 +377,9 @@ async fn api_1(pb: &ProgressBar, cid_1: &str, headers: &HeaderMap, v_code: &str,
 	let json_request = JsonRequest {
 		voucher_collection_request_list: vec![voucher_request],
 	};
-
-	// Convert struct to JSON
-	let json_body = serde_json::to_string(&json_request)?;
 	
 	loop {
-		let response = make_http_request(&cloned_headers, json_body.clone()).await?;
+		let response = make_http_request(client.clone(), headers.clone(), &json_request).await?;
 		let status = response.status();
 		let text = response.text().await?;
 		if status == reqwest::StatusCode::OK {
