@@ -1,0 +1,112 @@
+#![windows_subsystem = "windows"]
+use native_windows_gui as nwg;
+use std::fs;
+
+struct MyApp {
+    window: nwg::Window,
+    start_textbox: nwg::TextInput,
+    end_textbox: nwg::TextInput,
+    code_textbox: nwg::TextInput,
+    account_combobox: nwg::ComboBox<String>,
+    execute_button: nwg::Button,
+}
+
+impl MyApp {
+    fn new() -> Self {
+        let window = nwg::Window::builder()
+            .size((400, 300))
+            .title("My App")
+            .build()
+            .unwrap();
+
+        let start_textbox = MyApp::create_text_input(&window, "Start");
+        let end_textbox = MyApp::create_text_input(&window, "End");
+        let code_textbox = MyApp::create_text_input(&window, "Code");
+
+        let account_files = match fs::read_dir("akun") {
+            Ok(files) => files
+                .map(|res| res.map(|e| e.file_name().to_string_lossy().into_owned()))
+                .collect::<Result<Vec<_>, std::io::Error>>(),
+            Err(e) => {
+                eprintln!("Error reading directory 'akun': {}", e);
+                Ok(Vec::new())
+            }
+        }
+        .unwrap();
+
+        let account_combobox = MyApp::create_combobox(&window, account_files.clone()); // Pass cloned data here
+        let execute_button = MyApp::create_button(&window, "Execute");
+
+        MyApp::create_layout(
+            &window,
+            &start_textbox,
+            &end_textbox,
+            &code_textbox,
+            &account_combobox,
+            &execute_button,
+        );
+
+        window.show();
+
+        MyApp {
+            window,
+            start_textbox,
+            end_textbox,
+            code_textbox,
+            account_combobox,
+            execute_button,
+        }
+    }
+
+    fn create_text_input(parent: &nwg::Window, text: &str) -> nwg::TextInput {
+        nwg::TextInput::builder()
+            .parent(parent)
+            .text(text)
+            .build(&nwg::TextInput::default()) // Pass the TextInput reference here
+            .unwrap()
+    }
+
+    fn create_combobox(parent: &nwg::Window, account_files: Vec<String>) -> nwg::ComboBox<String> {
+        nwg::ComboBox::builder()
+            .parent(parent)
+            .collection(account_files)
+            .build(&nwg::ComboBox::default()) // Pass the ComboBox reference here
+            .unwrap()
+    }
+
+    fn create_button(parent: &nwg::Window, text: &str) -> nwg::Button {
+        nwg::Button::builder()
+            .parent(parent)
+            .text(text)
+            .build(&nwg::Button::default()) // Pass the Button reference here
+            .unwrap()
+    }
+
+    fn create_layout(
+        parent: &nwg::Window,
+        start_textbox: &nwg::TextInput,
+        end_textbox: &nwg::TextInput,
+        code_textbox: &nwg::TextInput,
+        account_combobox: &nwg::ComboBox<String>,
+        execute_button: &nwg::Button,
+    ) {
+        let grid = nwg::GridLayout::builder()
+            .parent(parent)
+            .spacing(1)
+            .child(0, 0, start_textbox)
+            .child(0, 1, end_textbox)
+            .child(0, 2, code_textbox)
+            .child(1, 0, account_combobox)
+            .child(1, 1, execute_button)
+            .build(&nwg::GridLayout::default()) // Pass the GridLayout reference here
+            .unwrap();
+        grid.finish(); // Add this line to finish the grid creation
+    }
+}
+
+fn main() {
+    let my_app = MyApp::new();
+
+    // Main event loop
+    nwg::dispatch_thread_events();
+}

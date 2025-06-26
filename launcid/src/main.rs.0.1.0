@@ -1,0 +1,116 @@
+#![windows_subsystem = "windows"]
+use native_windows_gui as nwg;
+use native_windows_derive::NwgUi;
+use native_windows_gui::NativeUi;
+use std::fs;
+
+#[derive(Default, NwgUi)]
+pub struct App {
+    #[nwg_control(size: (500, 200), position: (300, 300), title: "Aplikasi Rust")]
+    #[nwg_events( OnWindowClose: [App::exit] )]
+    window: nwg::Window,
+
+    #[nwg_layout(parent: window, spacing: 5)]
+    grid: nwg::GridLayout,
+
+    #[nwg_control(text: "Start")]
+    #[nwg_layout_item(layout: grid, col: 0, row: 0)]
+    start_label: nwg::Label,
+
+    #[nwg_control(text: "")]
+    #[nwg_layout_item(layout: grid, col: 1, row: 0, col_span: 2)]
+    start_text: nwg::TextInput,
+
+    #[nwg_control(text: "End")]
+    #[nwg_layout_item(layout: grid, col: 0, row: 1)]
+    end_label: nwg::Label,
+
+    #[nwg_control(text: "")]
+    #[nwg_layout_item(layout: grid, col: 1, row: 1, col_span: 2)]
+    end_text: nwg::TextInput,
+
+    #[nwg_control(text: "Code")]
+    #[nwg_layout_item(layout: grid, col: 0, row: 2)]
+    code_label: nwg::Label,
+
+    #[nwg_control(text: "")]
+    #[nwg_layout_item(layout: grid, col: 1, row: 2, col_span: 2)]
+    code_text: nwg::TextInput,
+
+    #[nwg_control(text: "Pilih file")]
+    #[nwg_layout_item(layout: grid, col: 3, row: 0)]
+    file_label: nwg::Label,
+
+    #[nwg_control]
+    #[nwg_layout_item(layout: grid, col: 4, row: 0, col_span: 2)]
+    file_combo: nwg::ComboBox<String>,
+
+    #[nwg_control(text: "Jalankan")]
+    #[nwg_layout_item(layout: grid, col: 4, row: 3)]
+    #[nwg_events( OnButtonClick: [App::run] )]
+    run_button: nwg::Button,
+
+    #[nwg_resource(family: "FontAwesome", size: 12)]
+    font_awesome: nwg::Font,
+}
+
+impl App {
+    fn exit(&self) {
+        nwg::stop_thread_dispatch();
+    }
+
+    fn run(&self) {
+		let start = self.start_text.text();
+        let end = self.end_text.text();
+        let code = self.code_text.text();
+        let file = self.file_combo.selection_string().unwrap_or_default();
+
+        // Menjalankan program main.exe dengan argumen yang dibuat
+        let command = format!(
+			r#"start cmd /c main.exe {} {} {} {}"#,
+                &start, &end, &code, &file
+        );
+
+        // Menjalankan perintah dengan cmd
+        let _status = std::process::Command::new("cmd")
+            .arg("/c")
+            .arg(command)
+            .spawn()
+            .expect("Gagal menjalankan program");
+		println!( "main.exe {} {} {} {}", &start, &end, &code, &file);
+		if file.is_empty() {
+			nwg::simple_message("Error", "Please select a file before running the program");
+            return;
+        }
+    }
+	
+	fn populate_file_combo(&self) {
+        // Specify the folder path where the files are located
+        let folder_path = "akun";
+
+        // Read the files in the specified folder
+        if let Ok(entries) = fs::read_dir(folder_path) {
+            println!("Reading folder akun");
+            println!("Available file");
+			for entry in entries {
+                if let Ok(entry) = entry {
+                    // Get the file name
+                    if let Some(file_name) = entry.file_name().to_str() {
+                        // Add the file name to the ComboBox
+                        println!("{}", file_name.to_string());
+						self.file_combo.push(file_name.to_string());
+                    }
+                }
+            }
+        } else {
+            println!("Failed to read the folder contents");
+        }
+    }
+}
+
+fn main() {
+    nwg::init().expect("Gagal menginisialisasi native windows gui");
+    let app = App::build_ui(Default::default()).expect("Gagal membangun antarmuka");
+	app.populate_file_combo();
+    nwg::dispatch_thread_events();
+}

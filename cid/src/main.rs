@@ -1,12 +1,12 @@
 /*
 This Is a first version of get_vouchers_by_collections
+Whats new In 1.3.3 :
+- add parameter design for 64 and 128 spaces
 Whats new In 1.3.2 :
 - New Algorithm Method
 Whats new In 1.3.1 :
 - update dependencies
 - Recompiling
-Whats new In 1.3.0 :
-- add base64 encode for evcode
 */
 
 use rquest as reqwest;
@@ -58,6 +58,8 @@ struct Opt {
 	file: Option<String>,
 	#[structopt(short, long, help = "Set default cookie file")]
 	cookie: bool,
+	#[structopt(short, long, help = "set parameter (Default: 128)")]
+	param: Option<i64>,
 }
 
 fn extract_csrftoken(cookie_string: &str) -> String {
@@ -71,7 +73,7 @@ fn extract_csrftoken(cookie_string: &str) -> String {
 	csrftoken
 }
 
-async fn process_arguments(start: &str, end: &str, v_code: &str) -> Result<()> {
+async fn process_arguments(start: &str, end: &str, v_code: &str, param: i64) -> Result<()> {
 	// Read the content of "akun.conf"
 	let selected_file = std::fs::read_to_string("./akun.conf")?;
 	let file_path = format!("./akun/{}", selected_file.trim());
@@ -79,12 +81,12 @@ async fn process_arguments(start: &str, end: &str, v_code: &str) -> Result<()> {
 	std::fs::File::open(&file_path)?.read_to_string(&mut cookie_content)?;
 
 	// Process HTTP with common function
-	some_function(start, end, v_code, &cookie_content, &selected_file).await?;
+	some_function(start, end, v_code, &cookie_content, &selected_file, param).await?;
 
 	Ok(())
 }
 
-async fn manual_input(opt: &Opt) -> Result<()> {
+async fn manual_input(opt: &Opt, param: i64) -> Result<()> {
 	let selected_file = opt.file.clone().unwrap_or_else(|| choose_cookie().expect("Folder akun dan file cookie tidak ada\n"));
 	// Read the content of the selected cookie file
 	let file_path = format!("./akun/{}", selected_file);
@@ -97,7 +99,7 @@ async fn manual_input(opt: &Opt) -> Result<()> {
 	let v_code = opt.v_code.clone().unwrap_or_else(|| get_user_input("Masukkan voucher_code: "));
 
 	// Process HTTP with common function
-	match some_function(&start, &end, &v_code, &cookie_content, &selected_file).await {
+	match some_function(&start, &end, &v_code, &cookie_content, &selected_file, param).await {
 	Ok(_) => {},
 	Err(err) => eprintln!("Error: {}", err),
 	}
@@ -135,8 +137,8 @@ fn interactive_print(pb: &ProgressBar, message: &str) {
 	}
 }
 
-async fn some_function(start: &str, end: &str, v_code: &str, cookie_content: &str, selected_file: &str) -> Result<()> {
-	let client = Arc::new(client_core());
+async fn some_function(start: &str, end: &str, v_code: &str, cookie_content: &str, selected_file: &str, param: i64) -> Result<()> {
+	let client = Arc::new(client_core().await);
 	let formatted_datetime = Utc::now().format("%Y-%m-%d_%H-%M-%S").to_string();
 	// Mengonversi nama akun menjadi format folder yang sesuai
 	let header_folder = format!("./header/{}/af-ac-enc-sz-token.txt", selected_file);
@@ -162,16 +164,16 @@ async fn some_function(start: &str, end: &str, v_code: &str, cookie_content: &st
 	println!("csrftoken: {}", csrftoken);
 	let csrftoken_string = csrftoken.to_string();
 	let headers = Arc::new(create_headers(&cookie_content, &csrftoken_string));
-	let mulai = fix_start (&start);
+	let mulai = fix_start (&start, param);
 	let end: i64 = end.trim().parse().expect("Input tidak valid");
 
 	// Jumlah nilai per batch
 	let values_per_batch = 5;
 
 	// Hitung jumlah batch
-	let batch_count = ((end - mulai) / 128 / values_per_batch) + 1;
+	let batch_count = ((end - mulai) / param / values_per_batch) + 1;
 
-	// Iterasi dan menuliskan angka dengan jarak 128
+	// Iterasi dan menuliskan angka dengan jarak param
 	let mut batch_number = 1;
 	let mut current = mulai;
 	
@@ -254,7 +256,7 @@ async fn some_function(start: &str, end: &str, v_code: &str, cookie_content: &st
 				}
 			}
 			// Tingkatkan nilai current untuk batch berikutnya
-			current += 128;
+			current += param;
 		}
 		interactive_print(&pb, &format!(""));
 		pb.inc(1);
@@ -339,7 +341,7 @@ fn create_headers(cookie_content: &str, csrftoken_string: &str) -> HeaderMap {
 	headers.insert(reqwest::header::COOKIE, reqwest::header::HeaderValue::from_str(&cookie_content).unwrap());
     headers
 }
-fn client_core() -> reqwest::Client {
+async fn client_core() -> reqwest::Client {
 	ClientBuilder::new()
 		.danger_accept_invalid_certs(true)
         .impersonate_skip_headers(Impersonate::Chrome131)
@@ -420,6 +422,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 	println!("Dapatkan Info terbaru di https://google.com");
 	println!("");
 	println!("-------------------------------------------");
+	let param = opt.param.unwrap_or(128);
 
 	if opt.cookie {
 		println!("Metode Cookie: Memilih cookie dan menyimpannya di file akun.conf");
@@ -430,9 +433,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 			opt.start.as_ref().map(String::as_str).unwrap_or_default(),
 			opt.end.as_ref().map(String::as_str).unwrap_or_default(),
 			opt.v_code.as_ref().map(String::as_str).unwrap_or_default(),
+			param,
 		).await?;
 	} else {
-		manual_input(&opt).await?;
+		manual_input(&opt, param).await?;
 	}
 	Ok(())
 }
@@ -476,10 +480,10 @@ fn get_user_input(prompt: &str) -> String {
 	io::stdin().read_line(&mut input).unwrap();
 	input.trim().to_string()
 }
-fn fix_start(start: &str) -> i64 {
+fn fix_start(start: &str, param: i64) -> i64 {
 	let start: i64 = start.trim().parse().expect("Input tidak valid");
 	println!("Check Start");
-	let x = (start - 8) as f64 / 128.0;
+	let x = (start - 8) as f64 / param as f64;
 	if x.fract() == 0.0 {
 		println!("Benar");
 		start
@@ -487,7 +491,7 @@ fn fix_start(start: &str) -> i64 {
 		println!("Hitung pendekatannya");
 		let rounded_up = x.ceil() as i64;
 		println!("Pembulatan ke atas: {}", rounded_up);
-		(rounded_up * 128) - 120
+		(rounded_up * param) - (param - 8)
 	}
 }
 
